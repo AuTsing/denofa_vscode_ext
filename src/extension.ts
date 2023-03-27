@@ -9,6 +9,9 @@ export function activate(context: Vscode.ExtensionContext) {
     commander.register('initializeWorkspace', initializer.initializeWorkspace);
 
     const languageServer = new LanguageServer(context);
+    // languageServer.enableCompletionItem();
+    languageServer.enableDefinition();
+    // languageServer.enableDocumentSymbol();
 }
 
 export function deactivate() {}
