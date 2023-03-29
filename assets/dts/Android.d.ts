@@ -1,3 +1,5 @@
+// deno-lint-ignore-file no-explicit-any
+
 declare namespace Android {
     namespace io {
         function toast(): void;

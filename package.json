@@ -1,6 +1,6 @@
 {
-    "name": "denort-extension",
-    "displayName": "denort-extension",
+    "name": "vscode-denort",
+    "displayName": "vscode-denort",
     "description": "VSCode extension for Denort.",
     "version": "0.0.1",
     "publisher": "autsing",
@@ -51,11 +51,8 @@
         "test": "node ./out/test/runTest.js"
     },
     "devDependencies": {
-        "@babel/parser": "^7.21.3",
-        "@babel/traverse": "^7.21.3",
-        "@babel/types": "^7.21.3",
-        "@types/babel__traverse": "^7.18.3",
         "@types/glob": "^8.1.0",
+        "@types/jsonfile": "^6.1.1",
         "@types/mocha": "^10.0.1",
         "@types/node": "16.x",
         "@types/vscode": "^1.76.0",
@@ -64,6 +61,7 @@
         "@vscode/test-electron": "^2.2.3",
         "eslint": "^8.34.0",
         "glob": "^8.1.0",
+        "jsonfile": "^6.1.0",
         "mocha": "^10.2.0",
         "ts-loader": "^9.4.2",
         "typescript": "^4.9.5",
