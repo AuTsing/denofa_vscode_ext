@@ -2,7 +2,8 @@ import * as Vscode from 'vscode';
 import * as Fs from 'fs';
 import * as Path from 'path';
 import * as Jsonfile from 'jsonfile';
-import { DENO_NS } from '../values/Constants';
+import { DENO_NS, DENO_EXTENSION_ID, DENO_CMD_RESTART } from '../values/Constants';
+import Output from './Output';
 
 export default class Initializer {
     private readonly context: Vscode.ExtensionContext;
@@ -13,7 +14,7 @@ export default class Initializer {
 
     async initializeWorkspace() {
         try {
-            const denoExtension = Vscode.extensions.getExtension('denoland.vscode-deno');
+            const denoExtension = Vscode.extensions.getExtension(DENO_EXTENSION_ID);
             if (!denoExtension) {
                 throw new Error('没有检测到 Deno 插件，请先安装官方 Deno 插件');
             }
@@ -47,12 +48,19 @@ export default class Initializer {
             }
             Jsonfile.writeFileSync(denoJson, denoJsonObject, { spaces: 4 });
 
-            await Vscode.window.showInformationMessage('Denort 工作区初始化成功');
-        } catch (err) {
-            console.log(err);
-            if (err instanceof Error) {
-                await Vscode.window.showErrorMessage('Denort 工作区初始化失败');
+            const mainTs = Path.join(workspaceFolder.uri.fsPath, 'main.ts');
+            const mainJs = Path.join(workspaceFolder.uri.fsPath, 'main.js');
+            if (!Fs.existsSync(mainTs) && !Fs.existsSync(mainJs)) {
+                const mainTsTemplate = Path.join(root, 'assets', 'templates', 'main.ts');
+                const mainTsContent = Fs.readFileSync(mainTsTemplate);
+                Fs.writeFileSync(mainTs, mainTsContent);
             }
+
+            await Vscode.commands.executeCommand(DENO_CMD_RESTART);
+
+            Output.printlnAndShow('Denort 工作区初始化成功');
+        } catch (err) {
+            Output.eprintln('Denort 工作区初始化失败:', err);
         }
     }
 }

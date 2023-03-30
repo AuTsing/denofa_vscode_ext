@@ -1,5 +1,5 @@
 import * as Vscode from 'vscode';
-import { EXTENSION_NS } from '../values/Constants';
+import { DENORT_NS } from '../values/Constants';
 
 export default class Commander {
     private context: Vscode.ExtensionContext;
@@ -9,6 +9,6 @@ export default class Commander {
     }
 
     register(command: string, callback: () => any) {
-        this.context.subscriptions.push(Vscode.commands.registerCommand(`${EXTENSION_NS}.${command}`, callback));
+        this.context.subscriptions.push(Vscode.commands.registerCommand(`${DENORT_NS}.${command}`, callback));
     }
 }

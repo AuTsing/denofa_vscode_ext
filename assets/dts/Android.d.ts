@@ -2,7 +2,7 @@
 
 declare namespace Android {
     namespace io {
-        function toast(): void;
+        function toast(...args: any[]): void;
 
         namespace log {
             function verbose(...args: any[]): void;
