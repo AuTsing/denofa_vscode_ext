@@ -20,6 +20,14 @@
             {
                 "command": "denort.initializeWorkspace",
                 "title": "Denort: 初始化工作区"
+            },
+            {
+                "command": "denort.connect",
+                "title": "Denort: 连接设备"
+            },
+            {
+                "command": "denort.disconnect",
+                "title": "Denort: 断开设备"
             }
         ],
         "configuration": {
@@ -56,6 +64,7 @@
         "@types/mocha": "^10.0.1",
         "@types/node": "16.x",
         "@types/vscode": "^1.76.0",
+        "@types/ws": "^8.5.4",
         "@typescript-eslint/eslint-plugin": "^5.53.0",
         "@typescript-eslint/parser": "^5.53.0",
         "@vscode/test-electron": "^2.2.3",
@@ -66,6 +75,7 @@
         "ts-loader": "^9.4.2",
         "typescript": "^4.9.5",
         "webpack": "^5.75.0",
-        "webpack-cli": "^5.0.1"
+        "webpack-cli": "^5.0.1",
+        "ws": "^8.13.0"
     }
 }
