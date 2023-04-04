@@ -4,12 +4,15 @@ import * as Path from 'path';
 import * as Jsonfile from 'jsonfile';
 import { DENO_NS, DENO_EXTENSION_ID, DENO_CMD_RESTART } from '../values/Constants';
 import Output from './Output';
+import Workspace from './Workspace';
 
 export default class Initializer {
     private readonly context: Vscode.ExtensionContext;
+    private readonly workspace: Workspace;
 
-    constructor(context: Vscode.ExtensionContext) {
+    constructor(context: Vscode.ExtensionContext, workspace: Workspace) {
         this.context = context;
+        this.workspace = workspace;
     }
 
     async initializeWorkspace() {
@@ -22,15 +25,7 @@ export default class Initializer {
             await denoConfig.update('enable', true);
             await denoConfig.update('unstable', true);
 
-            const workspaceFolders = Vscode.workspace.workspaceFolders;
-            if (!workspaceFolders) {
-                throw new Error('未打开工程');
-            }
-            if (workspaceFolders.length > 1) {
-                throw new Error('暂不支持多工程工作区');
-            }
-
-            const workspaceFolder = workspaceFolders[0];
+            const workspaceFolder = this.workspace.getWorkspaceFolder();
             const denoJson = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
             let denoJsonObject: { compilerOptions: { types: string[] } };
             if (Fs.existsSync(denoJson) && Fs.readFileSync(denoJson, { encoding: 'utf-8' }) !== '') {

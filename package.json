@@ -28,6 +28,18 @@
             {
                 "command": "denort.disconnect",
                 "title": "Denort: 断开设备"
+            },
+            {
+                "command": "denort.run",
+                "title": "Denort: 运行工程"
+            },
+            {
+                "command": "denort.stop",
+                "title": "Denort: 停止工程"
+            },
+            {
+                "command": "denort.upload",
+                "title": "Denort: 上传工程"
             }
         ],
         "configuration": {

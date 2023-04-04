@@ -14,6 +14,10 @@ export default class Output {
         this.instance?.show();
     }
 
+    static wprintln(...args: any[]) {
+        this.instance?.wprintln(...args);
+    }
+
     static eprintln(...args: any[]) {
         this.instance?.eprintln(...args);
     }
@@ -26,6 +30,10 @@ export default class Output {
 
     println(...args: any[]) {
         this.channel.info(Util.format(...args));
+    }
+
+    wprintln(...args: any[]) {
+        this.channel.warn(Util.format(...args));
     }
 
     eprintln(...args: any[]) {
