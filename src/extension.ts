@@ -7,14 +7,16 @@ import Registry from './components/Registry';
 import Commander from './components/Commander';
 import Workspace from './components/Workspace';
 import StatusBar from './components/StatusBar';
+import Storage from './components/Storage';
 
 export function activate(context: Vscode.ExtensionContext) {
     const workspace = new Workspace();
     const registry = new Registry(context);
+    const storage = new Storage(context);
     const initializer = new Initializer(context, workspace);
     const asker = new Asker();
     const commander = new Commander();
-    const wsd = new Wsd(asker, commander, workspace);
+    const wsd = new Wsd(asker, commander, workspace, storage);
 
     Output.instance = new Output();
     StatusBar.instance = new StatusBar(workspace);

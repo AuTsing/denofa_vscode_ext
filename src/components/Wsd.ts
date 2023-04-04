@@ -5,37 +5,44 @@ import Asker from './Asker';
 import Commander, { Commands, RunCommand, StopCommand, UploadCommand } from './Commander';
 import Workspace from './Workspace';
 import StatusBar from './StatusBar';
+import Storage from './Storage';
 
 export default class Wsd {
     private readonly asker: Asker;
     private readonly commander: Commander;
     private readonly workspace: Workspace;
+    private readonly storage: Storage;
     private wsc: WebSocket | null;
     private connecting: boolean;
 
-    constructor(asker: Asker, commander: Commander, workspace: Workspace) {
+    constructor(asker: Asker, commander: Commander, workspace: Workspace, storage: Storage) {
         this.asker = asker;
         this.commander = commander;
         this.workspace = workspace;
+        this.storage = storage;
         this.wsc = null;
         this.connecting = false;
     }
 
-    private async connect(url: string): Promise<WebSocket> {
+    private async connect(url: string): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.wsc) {
                 this.disconnect();
             }
+            this.storage.addWsUrl(url);
             const wsc = new WebSocket(url);
             wsc.on('open', () => {
-                resolve(wsc);
+                this.wsc = wsc;
+                Output.println(`已连接设备: ${url}`);
+                StatusBar.connected(url);
+                resolve();
             });
             wsc.on('error', e => {
                 reject(e);
             });
             wsc.on('close', () => {
                 if (this.wsc) {
-                    Output.printlnAndShow(`已断开设备: ${url}`);
+                    Output.println(`已断开设备: ${url}`);
                     StatusBar.disconnected(url);
                     this.wsc = null;
                 }
@@ -48,7 +55,7 @@ export default class Wsd {
 
     private disconnect() {
         if (!this.wsc) {
-            throw new Error('尚未连接设备');
+            throw new Error('未连接设备');
         }
         this.wsc.terminate();
     }
@@ -56,7 +63,7 @@ export default class Wsd {
     private async send(message: string): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!this.wsc) {
-                reject('尚未连接设备');
+                reject('未连接设备');
             }
             this.wsc!.send(message, e => {
                 if (!e) {
@@ -84,6 +91,31 @@ export default class Wsd {
         }
     }
 
+    private async connectAutomatically(): Promise<void> {
+        const doing = StatusBar.doing('连接中');
+        try {
+            if (this.wsc) {
+                return;
+            }
+            const urls = this.storage.getWsUrls();
+            if (urls.length === 0) {
+                throw new Error('未连接设备');
+            }
+            if (this.connecting) {
+                throw new Error('正在尝试连接设备中');
+            }
+            this.connecting = true;
+            const lastUrl = urls[urls.length - 1];
+            Output.println(`未连接设备，尝试连接最后使用设备: ${lastUrl}`);
+            await this.connect(lastUrl);
+        } catch (e) {
+            throw e;
+        } finally {
+            doing?.dispose();
+            this.connecting = false;
+        }
+    }
+
     async handleConnect() {
         const doing = StatusBar.doing('连接中');
         try {
@@ -92,9 +124,7 @@ export default class Wsd {
             }
             this.connecting = true;
             const url = await this.asker.askForWsUrl();
-            this.wsc = await this.connect(url);
-            Output.printlnAndShow(`已连接设备: ${url}`);
-            StatusBar.connected(url);
+            await this.connect(url);
         } catch (e) {
             Output.eprintln('连接设备失败:', e);
         }
@@ -112,6 +142,7 @@ export default class Wsd {
 
     async handleRun() {
         try {
+            await this.connectAutomatically();
             await this.uploadProject();
             const workspaceFolder = this.workspace.getWorkspaceFolder();
             const name = workspaceFolder.name;
@@ -128,6 +159,7 @@ export default class Wsd {
 
     async handleStop() {
         try {
+            await this.connectAutomatically();
             const workspaceFolder = this.workspace.getWorkspaceFolder();
             const name = workspaceFolder.name;
             const cmd: StopCommand = {
@@ -143,6 +175,7 @@ export default class Wsd {
 
     async handleUpload() {
         try {
+            await this.connectAutomatically();
             await this.uploadProject();
             Output.println('工程已上传');
         } catch (e) {
