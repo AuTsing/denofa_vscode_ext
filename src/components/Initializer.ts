@@ -2,7 +2,7 @@ import * as Vscode from 'vscode';
 import * as Fs from 'fs';
 import * as Path from 'path';
 import * as Jsonfile from 'jsonfile';
-import { DENO_NS, DENO_EXTENSION_ID, DENO_CMD_RESTART } from '../values/Constants';
+import { DENO_CMD_RESTART } from '../values/Constants';
 import Output from './Output';
 import Workspace from './Workspace';
 
@@ -17,11 +17,7 @@ export default class Initializer {
 
     async initializeWorkspace() {
         try {
-            const denoExtension = Vscode.extensions.getExtension(DENO_EXTENSION_ID);
-            if (!denoExtension) {
-                throw new Error('没有检测到 Deno 插件，请先安装官方 Deno 插件');
-            }
-            const denoConfig = Vscode.workspace.getConfiguration(DENO_NS);
+            const denoConfig = this.workspace.getDenoConfiguration();
             await denoConfig.update('enable', true);
             await denoConfig.update('unstable', true);
 

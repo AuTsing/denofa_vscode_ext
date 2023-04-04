@@ -6,23 +6,26 @@ import Asker from './components/Asker';
 import Registry from './components/Registry';
 import Commander from './components/Commander';
 import Workspace from './components/Workspace';
+import StatusBar from './components/StatusBar';
 
 export function activate(context: Vscode.ExtensionContext) {
-    Output.instance = new Output();
-
-    const registry = new Registry(context);
     const workspace = new Workspace();
+    const registry = new Registry(context);
     const initializer = new Initializer(context, workspace);
-    registry.register('initializeWorkspace', () => initializer.initializeWorkspace());
-
     const asker = new Asker();
     const commander = new Commander();
     const wsd = new Wsd(asker, commander, workspace);
+
+    Output.instance = new Output();
+    StatusBar.instance = new StatusBar(workspace);
+
+    registry.register('initializeWorkspace', () => initializer.initializeWorkspace());
     registry.register('connect', () => wsd.handleConnect());
     registry.register('disconnect', () => wsd.handleDisconnect());
     registry.register('run', () => wsd.handleRun());
     registry.register('stop', () => wsd.handleStop());
     registry.register('upload', () => wsd.handleUpload());
+    registry.listenOnDidChangeConfiguration(() => StatusBar.instance?.toggleStatusBar());
 }
 
 export function deactivate() {}

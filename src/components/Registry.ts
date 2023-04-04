@@ -11,4 +11,8 @@ export default class Registry {
     register(command: string, callback: () => any) {
         this.context.subscriptions.push(Vscode.commands.registerCommand(`${DENORT_NS}.${command}`, callback));
     }
+
+    listenOnDidChangeConfiguration(listener: (e: Vscode.ConfigurationChangeEvent) => any) {
+        this.context.subscriptions.push(Vscode.workspace.onDidChangeConfiguration(listener));
+    }
 }

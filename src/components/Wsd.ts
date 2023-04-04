@@ -4,39 +4,45 @@ import Output from './Output';
 import Asker from './Asker';
 import Commander, { Commands, RunCommand, StopCommand, UploadCommand } from './Commander';
 import Workspace from './Workspace';
+import StatusBar from './StatusBar';
 
 export default class Wsd {
     private readonly asker: Asker;
     private readonly commander: Commander;
     private readonly workspace: Workspace;
     private wsc: WebSocket | null;
+    private connecting: boolean;
 
     constructor(asker: Asker, commander: Commander, workspace: Workspace) {
         this.asker = asker;
         this.commander = commander;
         this.workspace = workspace;
         this.wsc = null;
+        this.connecting = false;
     }
 
-    private connect(url: string) {
-        if (this.wsc) {
-            this.disconnect();
-        }
-        const wsc = new WebSocket(url);
-        wsc.on('open', () => {
-            Output.printlnAndShow(`已连接设备: ${url}`);
-            this.wsc = wsc;
-        });
-        wsc.on('error', (...err) => {
-            Output.eprintln(...err);
-            this.disconnect();
-        });
-        wsc.on('close', () => {
-            Output.printlnAndShow(`已断开设备: ${url}`);
-            this.wsc = null;
-        });
-        wsc.on('message', message => {
-            this.commander.handleMessage(message.toString('utf-8'));
+    private async connect(url: string): Promise<WebSocket> {
+        return new Promise((resolve, reject) => {
+            if (this.wsc) {
+                this.disconnect();
+            }
+            const wsc = new WebSocket(url);
+            wsc.on('open', () => {
+                resolve(wsc);
+            });
+            wsc.on('error', e => {
+                reject(e);
+            });
+            wsc.on('close', () => {
+                if (this.wsc) {
+                    Output.printlnAndShow(`已断开设备: ${url}`);
+                    StatusBar.disconnected(url);
+                    this.wsc = null;
+                }
+            });
+            wsc.on('message', message => {
+                this.commander.handleMessage(message.toString('utf-8'));
+            });
         });
     }
 
@@ -79,19 +85,28 @@ export default class Wsd {
     }
 
     async handleConnect() {
+        const doing = StatusBar.doing('连接中');
         try {
+            if (this.connecting) {
+                throw new Error('正在尝试连接设备中');
+            }
+            this.connecting = true;
             const url = await this.asker.askForWsUrl();
-            this.connect(url);
+            this.wsc = await this.connect(url);
+            Output.printlnAndShow(`已连接设备: ${url}`);
+            StatusBar.connected(url);
         } catch (e) {
-            Output.eprintln(e);
+            Output.eprintln('连接设备失败:', e);
         }
+        doing?.dispose();
+        this.connecting = false;
     }
 
     handleDisconnect() {
         try {
             this.disconnect();
         } catch (e) {
-            Output.eprintln(e);
+            Output.eprintln('断开设备失败:', e);
         }
     }
 
@@ -107,7 +122,7 @@ export default class Wsd {
             const message = this.commander.adaptCommand(cmd);
             await this.send(message);
         } catch (e) {
-            Output.eprintln(e);
+            Output.eprintln('运行工程失败:', e);
         }
     }
 
@@ -122,7 +137,7 @@ export default class Wsd {
             const message = this.commander.adaptCommand(cmd);
             await this.send(message);
         } catch (e) {
-            Output.eprintln(e);
+            Output.eprintln('停止工程失败:', e);
         }
     }
 
@@ -131,7 +146,7 @@ export default class Wsd {
             await this.uploadProject();
             Output.println('工程已上传');
         } catch (e) {
-            Output.eprintln(e);
+            Output.eprintln('上传工程失败:', e);
         }
     }
 }

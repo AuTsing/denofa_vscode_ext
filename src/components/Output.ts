@@ -6,20 +6,20 @@ export default class Output {
     static instance?: Output;
 
     static println(...args: any[]) {
-        this.instance?.println(...args);
+        Output.instance?.println(...args);
     }
 
     static printlnAndShow(...args: any[]) {
-        this.instance?.println(...args);
-        this.instance?.show();
+        Output.instance?.println(...args);
+        Output.instance?.show();
     }
 
     static wprintln(...args: any[]) {
-        this.instance?.wprintln(...args);
+        Output.instance?.wprintln(...args);
     }
 
     static eprintln(...args: any[]) {
-        this.instance?.eprintln(...args);
+        Output.instance?.eprintln(...args);
     }
 
     private readonly channel: Vscode.LogOutputChannel;

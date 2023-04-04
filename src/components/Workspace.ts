@@ -1,6 +1,7 @@
 import * as Vscode from 'vscode';
 import * as FsPromises from 'fs/promises';
 import * as Path from 'path';
+import { DENO_EXTENSION_ID, DENO_NS } from '../values/Constants';
 
 export interface WorkspaceFile {
     name: string;
@@ -44,5 +45,13 @@ export default class Workspace {
         const workspaceFolder = this.getWorkspaceFolder();
         const files = await this.readdirRecursively(workspaceFolder.uri.fsPath, 'Projects/' + workspaceFolder.name);
         return files;
+    }
+
+    getDenoConfiguration(): Vscode.WorkspaceConfiguration {
+        const denoExtension = Vscode.extensions.getExtension(DENO_EXTENSION_ID);
+        if (!denoExtension) {
+            throw new Error('没有检测到 Deno 插件，请先安装官方 Deno 插件');
+        }
+        return Vscode.workspace.getConfiguration(DENO_NS);
     }
 }
