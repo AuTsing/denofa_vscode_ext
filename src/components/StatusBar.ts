@@ -56,16 +56,40 @@ export default class StatusBar {
         return statusItem;
     }
 
+    static running(runningProjects: string[]) {
+        if (!StatusBar.instance) {
+            return;
+        }
+        if (!StatusBar.instance.runningStatusItem) {
+            return;
+        }
+        if (runningProjects.length === 0) {
+            StatusBar.instance.runningStatusItem.dispose();
+            return;
+        }
+        if (runningProjects.length === 1) {
+            StatusBar.instance.runningStatusItem.content = runningProjects[0];
+        }
+        if (runningProjects.length > 1) {
+            StatusBar.instance.runningStatusItem.content = `${runningProjects.length} 个工程`;
+        }
+        if (!StatusBar.instance.statusItems.includes(StatusBar.instance.runningStatusItem)) {
+            StatusBar.instance.statusItems.push(StatusBar.instance.runningStatusItem);
+        }
+    }
+
     private readonly workspace: Workspace;
     private readonly statusBarItem: Vscode.StatusBarItem;
     private readonly statusItems: StatusItem[];
     private refresher: NodeJS.Timer | null;
+    private runningStatusItem: StatusItem | null;
 
     constructor(workspace: Workspace) {
         this.workspace = workspace;
         this.statusBarItem = Vscode.window.createStatusBarItem(Vscode.StatusBarAlignment.Left);
         this.statusItems = [];
         this.refresher = null;
+        this.runningStatusItem = new StatusItem('', this.statusItems, '$(loading~spin)', '运行中');
         const defaultStatusItem = new StatusItem('Denort', this.statusItems, '🦕');
         this.statusItems.push(defaultStatusItem);
         this.statusBarItem.text = defaultStatusItem.display();

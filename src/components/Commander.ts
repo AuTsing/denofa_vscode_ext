@@ -1,10 +1,12 @@
 import Output from './Output';
+import StatusBar from './StatusBar';
 
 export enum Commands {
     Run = 'run',
     Stop = 'stop',
     Upload = 'upload',
     Log = 'log',
+    StatusBar = 'statusBar',
 }
 
 export enum LogLevel {
@@ -18,7 +20,7 @@ interface BaseCommand {
     data: Command['data'];
 }
 
-export type Command = RunCommand | StopCommand | UploadCommand | LogCommand;
+export type Command = RunCommand | StopCommand | UploadCommand | LogCommand | StatusBarCommand;
 
 export interface RunCommand extends BaseCommand {
     cmd: Commands.Run;
@@ -38,6 +40,11 @@ export interface UploadCommand extends BaseCommand {
 export interface LogCommand extends BaseCommand {
     cmd: Commands.Log;
     data: { level: LogLevel; message: string };
+}
+
+export interface StatusBarCommand extends BaseCommand {
+    cmd: Commands.StatusBar;
+    data: { runningProjects: string[] };
 }
 
 export default class Commander {
@@ -70,6 +77,9 @@ export default class Commander {
                             Output.println(cmd.data.message);
                             break;
                     }
+                    break;
+                case Commands.StatusBar:
+                    StatusBar.running(cmd.data.runningProjects);
                     break;
                 default:
                     throw new Error(`不支持的命令: ${cmd.cmd}`);
