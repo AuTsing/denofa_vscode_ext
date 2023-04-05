@@ -14,7 +14,7 @@ export function activate(context: Vscode.ExtensionContext) {
     const registry = new Registry(context);
     const storage = new Storage(context);
     const initializer = new Initializer(context, workspace);
-    const asker = new Asker();
+    const asker = new Asker(storage);
     const commander = new Commander();
     const wsd = new Wsd(asker, commander, workspace, storage);
 

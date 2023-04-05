@@ -92,11 +92,11 @@ export default class Wsd {
     }
 
     private async connectAutomatically(): Promise<void> {
+        if (this.wsc) {
+            return;
+        }
         const doing = StatusBar.doing('连接中');
         try {
-            if (this.wsc) {
-                return;
-            }
             const urls = this.storage.getWsUrls();
             if (urls.length === 0) {
                 throw new Error('未连接设备');
@@ -123,7 +123,7 @@ export default class Wsd {
                 throw new Error('正在尝试连接设备中');
             }
             this.connecting = true;
-            const url = await this.asker.askForWsUrl();
+            const url = await this.asker.askForWsUrlWithHistory();
             await this.connect(url);
         } catch (e) {
             Output.eprintln('连接设备失败:', e);
