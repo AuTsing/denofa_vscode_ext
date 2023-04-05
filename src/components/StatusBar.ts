@@ -20,7 +20,10 @@ export class StatusItem {
     }
 
     public dispose() {
-        this.statusItems.splice(this.statusItems.indexOf(this), 1);
+        const index = this.statusItems.indexOf(this);
+        if (index > -1) {
+            this.statusItems.splice(index, 1);
+        }
     }
 
     public updateProgress(percent: number) {
@@ -45,6 +48,7 @@ export default class StatusBar {
         }
         const maybeStatusItem = StatusBar.instance.statusItems.find(it => it.content === label);
         maybeStatusItem?.dispose();
+        StatusBar.running([]);
     }
 
     static doing(task: string): StatusItem | undefined {
@@ -93,12 +97,21 @@ export default class StatusBar {
         const defaultStatusItem = new StatusItem('Denort', this.statusItems, '🦕');
         this.statusItems.push(defaultStatusItem);
         this.statusBarItem.text = defaultStatusItem.display();
+        this.statusBarItem.tooltip = 'Denort';
+        this.statusBarItem.command = 'denort.clickStatusBarItem';
         this.toggleStatusBar();
     }
 
     private refresh() {
         const statusItem = this.statusItems[this.statusItems.length - 1];
         this.statusBarItem.text = statusItem.display();
+        if (this.runningStatusItem && this.statusItems.includes(this.runningStatusItem)) {
+            this.statusBarItem.tooltip = '停止工程';
+        } else if (this.statusItems.length > 1) {
+            this.statusBarItem.tooltip = '断开设备';
+        } else {
+            this.statusBarItem.tooltip = '连接设备';
+        }
     }
 
     toggleStatusBar() {
@@ -115,5 +128,17 @@ export default class StatusBar {
         } catch (e) {
             Output.eprintln('启用状态栏失败:', e);
         }
+    }
+
+    handleClickStatusBarItem() {
+        if (this.runningStatusItem && this.statusItems.includes(this.runningStatusItem)) {
+            Vscode.commands.executeCommand('denort.stop');
+            return;
+        }
+        if (this.statusItems.length > 1) {
+            Vscode.commands.executeCommand('denort.disconnect');
+            return;
+        }
+        Vscode.commands.executeCommand('denort.connect');
     }
 }

@@ -30,7 +30,7 @@ export default class Wsd {
                 this.disconnect();
             }
             this.storage.addWsUrl(url);
-            const wsc = new WebSocket(url);
+            const wsc = new WebSocket(url, { handshakeTimeout: 5000 });
             wsc.on('open', () => {
                 this.wsc = wsc;
                 Output.println(`已连接设备: ${url}`);

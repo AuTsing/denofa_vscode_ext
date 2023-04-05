@@ -27,6 +27,7 @@ export function activate(context: Vscode.ExtensionContext) {
     registry.register('run', () => wsd.handleRun());
     registry.register('stop', () => wsd.handleStop());
     registry.register('upload', () => wsd.handleUpload());
+    registry.register('clickStatusBarItem', () => StatusBar.instance?.handleClickStatusBarItem());
     registry.listenOnDidChangeConfiguration(() => StatusBar.instance?.toggleStatusBar());
 }
 

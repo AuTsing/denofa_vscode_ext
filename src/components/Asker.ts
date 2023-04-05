@@ -29,8 +29,8 @@ export default class Asker {
         if (wsUrls.length === 0) {
             return this.askForWsUrl();
         }
-        const defaultSelections = ['连接新设备', '清空历史设备'];
-        const selections = wsUrls.concat(defaultSelections);
+        const defaultSelections = ['清空历史设备', '连接新设备'];
+        const selections = defaultSelections.concat(wsUrls).reverse();
         const selection = (await Vscode.window.showQuickPick(selections, { placeHolder: '请输入WS服务器URL' })) ?? '';
         if (selection === '连接新设备') {
             return this.askForWsUrl();
