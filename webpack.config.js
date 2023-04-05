@@ -3,7 +3,6 @@
 'use strict';
 
 const path = require('path');
-const nodeExternals = require('webpack-node-externals');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -18,7 +17,11 @@ const extensionConfig = {
         filename: 'extension.js',
         libraryTarget: 'commonjs2',
     },
-    externals: [{ vscode: 'commonjs vscode' }, nodeExternals()],
+    externals: {
+        vscode: 'commonjs vscode',
+        bufferutil: 'bufferutil',
+        'utf-8-validate': 'utf-8-validate',
+    },
     resolve: {
         extensions: ['.ts', '.js'],
     },
