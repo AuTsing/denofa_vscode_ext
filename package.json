@@ -2,8 +2,13 @@
     "name": "vscode-denort",
     "displayName": "vscode-denort",
     "description": "VSCode extension for Denort.",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "publisher": "autsing",
+    "repository": "https://github.com/AuTsing/vscode-denort",
+    "keywords": [
+        "denort",
+        "Denort"
+    ],
     "engines": {
         "vscode": "^1.76.0"
     },
@@ -41,23 +46,7 @@
                 "command": "denort.upload",
                 "title": "Denort: 上传工程"
             }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "Denort",
-            "properties": {
-                "denort.enable": {
-                    "type": "boolean",
-                    "default": false,
-                    "markdownDescription": "控制是否在工作区启用 Denort 插件，建议仅在需要的工作区开启",
-                    "scope": "resource",
-                    "examples": [
-                        true,
-                        false
-                    ]
-                }
-            }
-        }
+        ]
     },
     "scripts": {
         "vscode:prepublish": "npm run package",
