@@ -1,32 +1,47 @@
 // deno-lint-ignore-file no-explicit-any
 
 declare namespace Android {
+    /** 该模块提供对安卓设备的输入输出操作。 */
     namespace io {
+        /** 在屏幕输出 Toast 信息。 */
         function toast(...args: any[]): void;
 
+        /** 日志对象，可以在应用的日志屏幕输出日志。 */
         namespace log {
+            /** 输出级别为 `VERBOSE` 的日志。 */
             function verbose(...args: any[]): void;
 
+            /** 输出级别为 `DEBUG` 的日志。 */
             function debug(...args: any[]): void;
 
+            /** 输出级别为 `INFO` 的日志。 */
             function info(...args: any[]): void;
 
+            /** 输出级别为 `WARN` 的日志。 */
             function warn(...args: any[]): void;
 
+            /** 输出级别为 `ERROR` 的日志。 */
             function error(...args: any[]): void;
 
+            /** 输出级别为 `ASSERT` 的日志。 */
             function assert(...args: any[]): void;
 
+            /** 同 `verbose` */
             function v(...args: any[]): void;
 
+            /** 同 `debug` */
             function d(...args: any[]): void;
 
+            /** 同 `info` */
             function i(...args: any[]): void;
 
+            /** 同 `warn` */
             function w(...args: any[]): void;
 
+            /** 同 `error` */
             function e(...args: any[]): void;
 
+            /** 同 `assert` */
             function a(...args: any[]): void;
         }
     }
