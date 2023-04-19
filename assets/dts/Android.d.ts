@@ -343,7 +343,7 @@ declare namespace Android {
 
         find(): UiObject[];
 
-        findOne(): UiObject;
+        findOne(): UiObject | null;
 
         untilFind(timeout: number | undefined): Promise<UiObject[]>;
 
