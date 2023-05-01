@@ -42,4 +42,18 @@ export default class Asker {
         this.validateWsUrl(selection);
         return selection;
     }
+
+    async askForSnapshotSaveDir(): Promise<string> {
+        const dir =
+            (await Vscode.window.showOpenDialog({
+                canSelectFiles: false,
+                canSelectFolders: true,
+                canSelectMany: false,
+                title: '保存至',
+            })) ?? [];
+        if (dir.length === 0) {
+            throw new Error('保存路径选择不正确');
+        }
+        return dir[0].fsPath;
+    }
 }

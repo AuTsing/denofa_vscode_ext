@@ -45,6 +45,10 @@
             {
                 "command": "denort.upload",
                 "title": "Denort: 上传工程"
+            },
+            {
+                "command": "denort.snapshot",
+                "title": "Denort: 屏幕截图"
             }
         ]
     },

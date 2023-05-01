@@ -57,6 +57,7 @@ export default class StatusBar {
         }
         const statusItem = new StatusItem(task, StatusBar.instance.statusItems, '$(loading~spin)', '...');
         StatusBar.instance.statusItems.push(statusItem);
+        StatusBar.instance.refresh();
         return statusItem;
     }
 

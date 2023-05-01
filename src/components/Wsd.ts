@@ -1,8 +1,9 @@
 import * as WebSocket from 'ws';
 import * as FsPromises from 'fs/promises';
+import * as Path from 'path';
 import Output from './Output';
 import Asker from './Asker';
-import Commander, { Commands, RunCommand, StopCommand, UploadCommand } from './Commander';
+import Commander, { Commands, RunCommand, SnapshotCommand, StopCommand, UploadCommand } from './Commander';
 import Workspace from './Workspace';
 import StatusBar from './StatusBar';
 import Storage from './Storage';
@@ -14,6 +15,7 @@ export default class Wsd {
     private readonly storage: Storage;
     private wsc: WebSocket | null;
     private connecting: boolean;
+    private snapshoting: boolean;
 
     constructor(asker: Asker, commander: Commander, workspace: Workspace, storage: Storage) {
         this.asker = asker;
@@ -22,6 +24,7 @@ export default class Wsd {
         this.storage = storage;
         this.wsc = null;
         this.connecting = false;
+        this.snapshoting = false;
     }
 
     private async connect(url: string): Promise<void> {
@@ -116,6 +119,24 @@ export default class Wsd {
         }
     }
 
+    private async snapshot(): Promise<Uint8Array> {
+        const cmd: SnapshotCommand = {
+            cmd: Commands.Snapshot,
+            data: {
+                success: true,
+                message: '',
+                file: [],
+            },
+        };
+        const message = this.commander.adaptCommand(cmd);
+        await this.send(message);
+        const snapshotData = await this.commander.waitForSnapshotData();
+        if (!snapshotData.success) {
+            throw new Error(snapshotData.message);
+        }
+        return Uint8Array.from(snapshotData.file);
+    }
+
     async handleConnect() {
         const doing = StatusBar.doing('连接中');
         try {
@@ -127,9 +148,10 @@ export default class Wsd {
             await this.connect(url);
         } catch (e) {
             Output.eprintln('连接设备失败:', e);
+        } finally {
+            doing?.dispose();
+            this.connecting = false;
         }
-        doing?.dispose();
-        this.connecting = false;
     }
 
     handleDisconnect() {
@@ -180,6 +202,29 @@ export default class Wsd {
             Output.println('工程已上传');
         } catch (e) {
             Output.eprintln('上传工程失败:', e);
+        }
+    }
+
+    async handleSnapshot() {
+        const doing = StatusBar.doing('截图中');
+        try {
+            if (this.snapshoting) {
+                throw new Error('正在尝试屏幕截图中');
+            }
+            this.snapshoting = true;
+            await this.connectAutomatically();
+            const img = await this.snapshot();
+            const saveDir = await this.asker.askForSnapshotSaveDir();
+            const now = Date.now();
+            const filename = `Snapshot_${now}.png`;
+            const snapshotPng = Path.join(saveDir, filename);
+            await FsPromises.writeFile(snapshotPng, img);
+            Output.println('屏幕截图已保存至:', snapshotPng);
+        } catch (e) {
+            Output.eprintln('屏幕截图失败:', e);
+        } finally {
+            doing?.dispose();
+            this.snapshoting = false;
         }
     }
 }

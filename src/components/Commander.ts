@@ -7,6 +7,7 @@ export enum Commands {
     Upload = 'upload',
     Log = 'log',
     StatusBar = 'statusBar',
+    Snapshot = 'snapshot',
 }
 
 export enum LogLevel {
@@ -20,7 +21,7 @@ interface BaseCommand {
     data: Command['data'];
 }
 
-export type Command = RunCommand | StopCommand | UploadCommand | LogCommand | StatusBarCommand;
+export type Command = RunCommand | StopCommand | UploadCommand | LogCommand | StatusBarCommand | SnapshotCommand;
 
 export interface RunCommand extends BaseCommand {
     cmd: Commands.Run;
@@ -47,7 +48,24 @@ export interface StatusBarCommand extends BaseCommand {
     data: { runningProjects: string[] };
 }
 
+export interface SnapshotCommand extends BaseCommand {
+    cmd: Commands.Snapshot;
+    data: { success: boolean; message: string; file: number[] };
+}
+
 export default class Commander {
+    private readonly snapshotConsumers: ((data: SnapshotCommand['data']) => void)[];
+
+    constructor() {
+        this.snapshotConsumers = [];
+    }
+
+    async waitForSnapshotData(): Promise<SnapshotCommand['data']> {
+        return new Promise((resolve, reject) => {
+            this.snapshotConsumers.push(resolve);
+        });
+    }
+
     adaptCommand(cmd: string): Command;
     adaptCommand(cmd: Command): string;
     adaptCommand(cmd: string | Command): Command | string {
@@ -80,6 +98,12 @@ export default class Commander {
                     break;
                 case Commands.StatusBar:
                     StatusBar.running(cmd.data.runningProjects);
+                    break;
+                case Commands.Snapshot:
+                    const consumer = this.snapshotConsumers.shift();
+                    if (consumer) {
+                        consumer(cmd.data);
+                    }
                     break;
                 default:
                     throw new Error(`不支持的命令: ${cmd.cmd}`);
