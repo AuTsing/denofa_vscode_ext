@@ -77,10 +77,29 @@ export default class StatusBar {
         }
         if (runningProjects.length > 1) {
             StatusBar.instance.runningStatusItem.content = `${runningProjects.length} 个工程`;
+            StatusBar.instance.refresh();
         }
         if (!StatusBar.instance.statusItems.includes(StatusBar.instance.runningStatusItem)) {
             StatusBar.instance.statusItems.push(StatusBar.instance.runningStatusItem);
+            StatusBar.instance.refresh();
         }
+    }
+
+    static result(label: string) {
+        if (!StatusBar.instance) {
+            return;
+        }
+        const statusItem = new StatusItem(label, StatusBar.instance.statusItems, '✅');
+        StatusBar.instance.statusItems.push(statusItem);
+        StatusBar.instance.refresh();
+        setTimeout(() => statusItem.dispose(), 1500);
+    }
+
+    static refresh() {
+        if (!StatusBar.instance) {
+            return;
+        }
+        StatusBar.instance.refresh();
     }
 
     private readonly workspace: Workspace;
