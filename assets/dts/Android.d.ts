@@ -1,6 +1,34 @@
 // deno-lint-ignore-file no-explicit-any
 
+// DenortCore Version: v0.4.0
+
 declare namespace Android {
+    class Point {
+        static from(point: Point): Point;
+
+        constructor(x: number, y: number, c: number);
+
+        x: number;
+
+        y: number;
+
+        c: number;
+    }
+
+    class Rect {
+        static from(rect: Rect): Rect;
+
+        constructor(left: number, top: number, right: number, bottom: number);
+
+        left: number;
+
+        top: number;
+
+        right: number;
+
+        bottom: number;
+    }
+
     /** 该模块提供对安卓设备的输入输出操作。 */
     namespace io {
         /** 在屏幕输出 Toast 信息。 */
@@ -48,11 +76,11 @@ declare namespace Android {
 
     namespace finger {
         namespace accessibility {
-            function click(x: number, y: number): Promise<void>;
+            function click(point: Point): Promise<void>;
 
-            function press(x: number, y: number, duration: number | undefined): Promise<void>;
+            function press(point: Point, duration: number | undefined): Promise<void>;
 
-            function swipe(xFrom: number, yFrom: number, xTo: number, yTo: number, duration: number | undefined): Promise<void>;
+            function swipe(pointFrom: Point, pointTo: Point, duration: number | undefined): Promise<void>;
 
             function home(): void;
 
@@ -74,20 +102,12 @@ declare namespace Android {
         }
     }
 
-    class Rect {
-        left(): number;
-
-        top(): number;
-
-        right(): number;
-
-        bottom(): number;
-    }
-
     class UiObject {
         getParent(): UiObject | null;
 
         getChild(i: number): UiObject | null;
+
+        getOriginId(): string;
 
         getId(): string;
 
@@ -352,5 +372,37 @@ declare namespace Android {
         exists(): boolean;
 
         wait(timeout: number | undefined): Promise<void>;
+    }
+
+    namespace img {
+        class CompareColorOptions {
+            constructor(threshold: number | undefined);
+        }
+
+        class FindColorOptions {
+            constructor(threshold: number | undefined, rect: Rect | undefined);
+        }
+
+        function refresh(): Promise<number>;
+
+        function refreshManually(): Promise<number>;
+
+        function getImage(): number;
+
+        function lock(): void;
+
+        function unlock(): void;
+
+        function compareColor(point: Point, options: CompareColorOptions | undefined): Promise<boolean>;
+
+        function compareColors(point: Point, options: CompareColorOptions | undefined): Promise<boolean>;
+
+        function findColor(color: number, options: FindColorOptions | undefined): Promise<Point>;
+
+        function findColors(color: number, options: FindColorOptions | undefined): Promise<Point[]>;
+
+        function findMultiColor(color: number, points: Point[], options: FindColorOptions | undefined): Promise<Point>;
+
+        function findMultiColors(color: number, points: Point[], options: FindColorOptions | undefined): Promise<Point[]>;
     }
 }

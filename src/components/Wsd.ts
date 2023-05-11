@@ -146,6 +146,7 @@ export default class Wsd {
             this.connecting = true;
             const url = await this.asker.askForWsUrlWithHistory();
             await this.connect(url);
+            Output.println('连接设备成功:', url);
         } catch (e) {
             Output.eprintln('连接设备失败:', e);
         } finally {
@@ -174,6 +175,7 @@ export default class Wsd {
             };
             const message = this.commander.adaptCommand(cmd);
             await this.send(message);
+            Output.eprintln('运行工程成功:', name);
         } catch (e) {
             Output.eprintln('运行工程失败:', e);
         }
