@@ -78,9 +78,9 @@ declare namespace Android {
         namespace accessibility {
             function click(point: Point): Promise<void>;
 
-            function press(point: Point, duration: number | undefined): Promise<void>;
+            function press(point: Point, duration?: number): Promise<void>;
 
-            function swipe(pointFrom: Point, pointTo: Point, duration: number | undefined): Promise<void>;
+            function swipe(pointFrom: Point, pointTo: Point, duration?: number): Promise<void>;
 
             function home(): void;
 
@@ -107,8 +107,6 @@ declare namespace Android {
 
         getChild(i: number): UiObject | null;
 
-        getOriginId(): string;
-
         getId(): string;
 
         getDesc(): string;
@@ -118,6 +116,8 @@ declare namespace Android {
         getPackageName(): string;
 
         getText(): string;
+
+        getOriginId(): number;
 
         getDepth(): number;
 
@@ -291,47 +291,47 @@ declare namespace Android {
 
         packageNameEndsWith(suffix: string): UiSelectorBuilder;
 
-        bounds(left: number, top: number, right: number, bottom: number): UiSelectorBuilder;
+        bounds(rect: Rect): UiSelectorBuilder;
 
-        boundsEquals(left: number, top: number, right: number, bottom: number): UiSelectorBuilder;
+        boundsEquals(rect: Rect): UiSelectorBuilder;
 
-        boundsInside(left: number, top: number, right: number, bottom: number): UiSelectorBuilder;
+        boundsInside(rect: Rect): UiSelectorBuilder;
 
-        boundsContains(left: number, top: number, right: number, bottom: number): UiSelectorBuilder;
+        boundsContains(rect: Rect): UiSelectorBuilder;
 
-        checkable(value: boolean | undefined): UiSelectorBuilder;
+        checkable(value?: boolean): UiSelectorBuilder;
 
-        checked(value: boolean | undefined): UiSelectorBuilder;
+        checked(value?: boolean): UiSelectorBuilder;
 
-        focusable(value: boolean | undefined): UiSelectorBuilder;
+        focusable(value?: boolean): UiSelectorBuilder;
 
-        focused(value: boolean | undefined): UiSelectorBuilder;
+        focused(value?: boolean): UiSelectorBuilder;
 
-        visibleToUser(value: boolean | undefined): UiSelectorBuilder;
+        visibleToUser(value?: boolean): UiSelectorBuilder;
 
-        accessibilityFocused(value: boolean | undefined): UiSelectorBuilder;
+        accessibilityFocused(value?: boolean): UiSelectorBuilder;
 
-        selected(value: boolean | undefined): UiSelectorBuilder;
+        selected(value?: boolean): UiSelectorBuilder;
 
-        clickable(value: boolean | undefined): UiSelectorBuilder;
+        clickable(value?: boolean): UiSelectorBuilder;
 
-        longClickable(value: boolean | undefined): UiSelectorBuilder;
+        longClickable(value?: boolean): UiSelectorBuilder;
 
-        enabled(value: boolean | undefined): UiSelectorBuilder;
+        enabled(value?: boolean): UiSelectorBuilder;
 
-        password(value: boolean | undefined): UiSelectorBuilder;
+        password(value?: boolean): UiSelectorBuilder;
 
-        scrollable(value: boolean | undefined): UiSelectorBuilder;
+        scrollable(value?: boolean): UiSelectorBuilder;
 
-        editable(value: boolean | undefined): UiSelectorBuilder;
+        editable(value?: boolean): UiSelectorBuilder;
 
-        contentInvalid(value: boolean | undefined): UiSelectorBuilder;
+        contentInvalid(value?: boolean): UiSelectorBuilder;
 
-        contextClickable(value: boolean | undefined): UiSelectorBuilder;
+        contextClickable(value?: boolean): UiSelectorBuilder;
 
-        multiLine(value: boolean | undefined): UiSelectorBuilder;
+        multiLine(value?: boolean): UiSelectorBuilder;
 
-        dismissable(value: boolean | undefined): UiSelectorBuilder;
+        dismissable(value?: boolean): UiSelectorBuilder;
 
         depth(value: number): UiSelectorBuilder;
 
@@ -365,22 +365,22 @@ declare namespace Android {
 
         findOne(): UiObject | null;
 
-        untilFind(timeout: number | undefined): Promise<UiObject[]>;
+        untilFind(timeout?: number): Promise<UiObject[]>;
 
-        untilFindOne(timeout: number | undefined): Promise<UiObject>;
+        untilFindOne(timeout?: number): Promise<UiObject>;
 
         exists(): boolean;
 
-        wait(timeout: number | undefined): Promise<void>;
+        wait(timeout?: number): Promise<void>;
     }
 
     namespace img {
         class CompareColorOptions {
-            constructor(threshold: number | undefined);
+            constructor(threshold?: number);
         }
 
         class FindColorOptions {
-            constructor(threshold: number | undefined, rect: Rect | undefined);
+            constructor(threshold?: number, rect?: Rect);
         }
 
         function refresh(): Promise<number>;
@@ -393,16 +393,16 @@ declare namespace Android {
 
         function unlock(): void;
 
-        function compareColor(point: Point, options: CompareColorOptions | undefined): Promise<boolean>;
+        function compareColor(point: Point, options?: CompareColorOptions): Promise<boolean>;
 
-        function compareColors(point: Point, options: CompareColorOptions | undefined): Promise<boolean>;
+        function compareColors(point: Point, options?: CompareColorOptions): Promise<boolean>;
 
-        function findColor(color: number, options: FindColorOptions | undefined): Promise<Point>;
+        function findColor(color: number, options?: FindColorOptions): Promise<Point>;
 
-        function findColors(color: number, options: FindColorOptions | undefined): Promise<Point[]>;
+        function findColors(color: number, options?: FindColorOptions): Promise<Point[]>;
 
-        function findMultiColor(color: number, points: Point[], options: FindColorOptions | undefined): Promise<Point>;
+        function findMultiColor(color: number, points: Point[], options?: FindColorOptions): Promise<Point>;
 
-        function findMultiColors(color: number, points: Point[], options: FindColorOptions | undefined): Promise<Point[]>;
+        function findMultiColors(color: number, points: Point[], options?: FindColorOptions): Promise<Point[]>;
     }
 }

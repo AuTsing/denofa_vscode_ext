@@ -30,6 +30,8 @@ export function activate(context: Vscode.ExtensionContext) {
     registry.register('snapshot', () => wsd.handleSnapshot());
     registry.register('clickStatusBarItem', () => StatusBar.instance?.handleClickStatusBarItem());
     registry.listenOnDidChangeConfiguration(() => StatusBar.instance?.toggleStatusBar());
+
+    initializer.initializeDenoJson();
 }
 
 export function deactivate() {}
