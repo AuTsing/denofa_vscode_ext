@@ -2,7 +2,7 @@
     "name": "vscode-denort",
     "displayName": "Denort",
     "description": "VSCode extension for Denort.",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "publisher": "autsing",
     "repository": "https://github.com/AuTsing/vscode-denort",
     "icon": "./assets/images/denort_128_128.png",
