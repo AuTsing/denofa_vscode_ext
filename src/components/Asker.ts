@@ -56,4 +56,17 @@ export default class Asker {
         }
         return dir[0].fsPath;
     }
+
+    async askForIsUpdateDts(ver: string): Promise<boolean> {
+        const selection = (await Vscode.window.showInformationMessage(`声明文件有新版本 ${ver}，是否更新工作区`, '是', '否', '不再提示')) ?? '否';
+        if (selection === '不再提示') {
+            this.storage.setUpdateDts(false);
+        }
+
+        if (selection === '是') {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

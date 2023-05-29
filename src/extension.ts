@@ -13,8 +13,8 @@ export function activate(context: Vscode.ExtensionContext) {
     const workspace = new Workspace();
     const registry = new Registry(context);
     const storage = new Storage(context);
-    const initializer = new Initializer(context, workspace);
     const asker = new Asker(storage);
+    const initializer = new Initializer(context, workspace, asker, storage);
     const commander = new Commander();
     const wsd = new Wsd(asker, commander, workspace, storage);
 
@@ -31,7 +31,7 @@ export function activate(context: Vscode.ExtensionContext) {
     registry.register('clickStatusBarItem', () => StatusBar.instance?.handleClickStatusBarItem());
     registry.listenOnDidChangeConfiguration(() => StatusBar.instance?.toggleStatusBar());
 
-    initializer.initializeDenoJson();
+    initializer.updateDenortDts();
 }
 
 export function deactivate() {}
