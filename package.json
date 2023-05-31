@@ -28,6 +28,10 @@
                 "title": "Denort: 初始化工作区"
             },
             {
+                "command": "denort.updateDenortDts",
+                "title": "Denort: 检查更新类型定义文件"
+            },
+            {
                 "command": "denort.connect",
                 "title": "Denort: 连接设备"
             },

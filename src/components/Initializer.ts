@@ -97,6 +97,11 @@ export default class Initializer {
 
     async updateDenortDts() {
         try {
+            const denoConfig = this.workspace.getDenoConfiguration();
+            if (denoConfig.get('enable') !== true) {
+                return;
+            }
+
             const updateDts = this.storage.getUpdateDts();
             if (!updateDts) {
                 return;
