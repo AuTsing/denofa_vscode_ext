@@ -6,9 +6,10 @@ import * as Jsonfile from 'jsonfile';
 import Axios from 'axios';
 import Output from './Output';
 import Workspace from './Workspace';
-import { DENORT_DTS_URL, DENO_CMD_CACHE } from '../values/Constants';
+import { DENORT_DTS_URL, DENO_CMD_CACHE, DENO_CMD_RESTART } from '../values/Constants';
 import Asker from './Asker';
 import Storage from './Storage';
+import StatusBar from './StatusBar';
 
 export default class Initializer {
     private readonly context: Vscode.ExtensionContext;
@@ -57,10 +58,6 @@ export default class Initializer {
 
     async initializeWorkspace() {
         try {
-            const denoConfig = this.workspace.getDenoConfiguration();
-            await denoConfig.update('enable', true);
-            await denoConfig.update('unstable', true);
-
             const workspaceFolder = this.workspace.getWorkspaceFolder();
             const denoJson = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
             let denoJsonObject: { compilerOptions: { types: string[] } };
@@ -87,7 +84,12 @@ export default class Initializer {
                 await FsPromises.writeFile(mainTs, mainTsContent);
             }
 
-            await Vscode.commands.executeCommand(DENO_CMD_CACHE);
+            const denoConfig = this.workspace.getDenoConfiguration();
+            await denoConfig.update('enable', true);
+            await denoConfig.update('lint', true);
+            await denoConfig.update('unstable', true);
+            const denortConfig = this.workspace.getDenortConfiguration();
+            await denortConfig.update('enable', true);
 
             Output.printlnAndShow('Denort 工作区初始化成功');
         } catch (err) {
@@ -95,10 +97,15 @@ export default class Initializer {
         }
     }
 
+    async initializeDenort() {
+        StatusBar.instance?.toggleStatusBar();
+        this.updateDenortDts();
+    }
+
     async updateDenortDts() {
         try {
-            const denoConfig = this.workspace.getDenoConfiguration();
-            if (denoConfig.get('enable') !== true) {
+            const denortConfig = this.workspace.getDenortConfiguration();
+            if (denortConfig.get('enable') !== true) {
                 return;
             }
 
@@ -133,7 +140,10 @@ export default class Initializer {
             denoJsonObject.compilerOptions.types.push(latestUrl);
             await Jsonfile.writeFile(denoJson, denoJsonObject, { spaces: 4 });
 
+            await new Promise(resolve => setTimeout(() => resolve(null), 1000));
             await Vscode.commands.executeCommand(DENO_CMD_CACHE);
+            await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+            await Vscode.commands.executeCommand(DENO_CMD_RESTART);
 
             Output.printlnAndShow('更新类型定义文件成功');
         } catch (err) {

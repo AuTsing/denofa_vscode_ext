@@ -59,6 +59,11 @@
         "configuration": {
             "title": "Denort",
             "properties": {
+                "denort.enable": {
+                    "description": "启用插件",
+                    "type": "boolean",
+                    "default": false
+                },
                 "denort.updateDts": {
                     "description": "检查更新类型定义文件",
                     "type": "boolean",

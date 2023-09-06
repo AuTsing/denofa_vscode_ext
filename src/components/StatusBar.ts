@@ -119,7 +119,6 @@ export default class StatusBar {
         this.statusBarItem.text = defaultStatusItem.display();
         this.statusBarItem.tooltip = 'Denort';
         this.statusBarItem.command = 'denort.clickStatusBarItem';
-        this.toggleStatusBar();
     }
 
     private refresh() {
@@ -136,11 +135,11 @@ export default class StatusBar {
 
     toggleStatusBar() {
         try {
-            const denoConfig = this.workspace.getDenoConfiguration();
-            if (denoConfig.get('enable') === true && this.refresher === null) {
+            const denortConfig = this.workspace.getDenortConfiguration();
+            if (denortConfig.get('enable') === true && this.refresher === null) {
                 this.statusBarItem.show();
                 this.refresher = setInterval(() => this.refresh(), 1000);
-            } else if (denoConfig.get('enable') !== true && this.refresher !== null) {
+            } else if (denortConfig.get('enable') !== true && this.refresher !== null) {
                 this.statusBarItem.hide();
                 clearInterval(this.refresher);
                 this.refresher = null;

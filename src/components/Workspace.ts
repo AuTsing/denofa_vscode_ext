@@ -1,7 +1,7 @@
 import * as Vscode from 'vscode';
 import * as FsPromises from 'fs/promises';
 import * as Path from 'path';
-import { DENO_EXTENSION_ID, DENO_NS } from '../values/Constants';
+import { DENORT_EXTENSION_ID, DENORT_NS, DENO_EXTENSION_ID, DENO_NS } from '../values/Constants';
 
 export interface WorkspaceFile {
     name: string;
@@ -50,8 +50,16 @@ export default class Workspace {
     getDenoConfiguration(): Vscode.WorkspaceConfiguration {
         const denoExtension = Vscode.extensions.getExtension(DENO_EXTENSION_ID);
         if (!denoExtension) {
-            throw new Error('没有检测到 Deno 插件，请先安装官方 Deno 插件');
+            throw new Error('未检测到 `Deno` 官方插件，请先安装插件后再进行操作');
         }
         return Vscode.workspace.getConfiguration(DENO_NS);
+    }
+
+    getDenortConfiguration(): Vscode.WorkspaceConfiguration {
+        const denortExtension = Vscode.extensions.getExtension(DENORT_EXTENSION_ID);
+        if (!denortExtension) {
+            throw new Error('未检测到 `Denort` 插件，请先安装插件后再进行操作');
+        }
+        return Vscode.workspace.getConfiguration(DENORT_NS);
     }
 }

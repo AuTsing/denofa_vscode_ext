@@ -30,9 +30,9 @@ export function activate(context: Vscode.ExtensionContext) {
     registry.register('upload', () => wsd.handleUpload());
     registry.register('snapshot', () => wsd.handleSnapshot());
     registry.register('clickStatusBarItem', () => StatusBar.instance?.handleClickStatusBarItem());
-    registry.listenOnDidChangeConfiguration(() => StatusBar.instance?.toggleStatusBar());
+    registry.listenOnDidChangeConfiguration(() => initializer.initializeDenort());
 
-    initializer.updateDenortDts();
+    initializer.initializeDenort();
 }
 
 export function deactivate() {}
