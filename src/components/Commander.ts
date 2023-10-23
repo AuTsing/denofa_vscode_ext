@@ -4,6 +4,7 @@ import StatusBar from './StatusBar';
 export enum Commands {
     Run = 'run',
     Stop = 'stop',
+    Remove = 'remove',
     Upload = 'upload',
     Log = 'log',
     StatusBar = 'statusBar',
@@ -21,7 +22,7 @@ interface BaseCommand {
     data: Command['data'];
 }
 
-export type Command = RunCommand | StopCommand | UploadCommand | LogCommand | StatusBarCommand | SnapshotCommand;
+export type Command = RunCommand | StopCommand | RemoveCommand | UploadCommand | LogCommand | StatusBarCommand | SnapshotCommand;
 
 export interface RunCommand extends BaseCommand {
     cmd: Commands.Run;
@@ -30,6 +31,11 @@ export interface RunCommand extends BaseCommand {
 
 export interface StopCommand extends BaseCommand {
     cmd: Commands.Stop;
+    data: { name: string };
+}
+
+export interface RemoveCommand extends BaseCommand {
+    cmd: Commands.Remove;
     data: { name: string };
 }
 

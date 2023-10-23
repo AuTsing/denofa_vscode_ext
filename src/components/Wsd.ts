@@ -3,7 +3,7 @@ import * as FsPromises from 'fs/promises';
 import * as Path from 'path';
 import Output from './Output';
 import Asker from './Asker';
-import Commander, { Commands, RunCommand, SnapshotCommand, StopCommand, UploadCommand } from './Commander';
+import Commander, { Commands, RemoveCommand, RunCommand, SnapshotCommand, StopCommand, UploadCommand } from './Commander';
 import Workspace from './Workspace';
 import StatusBar from './StatusBar';
 import Storage from './Storage';
@@ -67,8 +67,9 @@ export default class Wsd {
         return new Promise((resolve, reject) => {
             if (!this.wsc) {
                 reject('未连接设备');
+                return;
             }
-            this.wsc!.send(message, e => {
+            this.wsc.send(message, e => {
                 if (!e) {
                     resolve();
                 } else {
@@ -78,6 +79,17 @@ export default class Wsd {
         });
     }
 
+    private async removeProject(): Promise<void> {
+        const workspaceFolder = this.workspace.getWorkspaceFolder();
+        const name = workspaceFolder.name;
+        const cmd: RemoveCommand = {
+            cmd: Commands.Remove,
+            data: { name },
+        };
+        const message = this.commander.adaptCommand(cmd);
+        await this.send(message);
+    }
+
     private async uploadProject(): Promise<void> {
         const files = await this.workspace.getWrokspaceFiles();
         for (const file of files) {
@@ -85,7 +97,7 @@ export default class Wsd {
             const cmd: UploadCommand = {
                 cmd: Commands.Upload,
                 data: {
-                    dst: file.relativePath,
+                    dst: file.remotePath,
                     file: Array.from(new Uint8Array(buffer)),
                 },
             };
@@ -166,6 +178,7 @@ export default class Wsd {
     async handleRun() {
         try {
             await this.connectAutomatically();
+            await this.removeProject();
             await this.uploadProject();
             const workspaceFolder = this.workspace.getWorkspaceFolder();
             const name = workspaceFolder.name;
@@ -200,6 +213,7 @@ export default class Wsd {
     async handleUpload() {
         try {
             await this.connectAutomatically();
+            await this.removeProject();
             await this.uploadProject();
             Output.println('工程已上传');
         } catch (e) {
