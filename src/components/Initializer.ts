@@ -59,21 +59,19 @@ export default class Initializer {
     async initializeWorkspace() {
         try {
             const workspaceFolder = this.workspace.getWorkspaceFolder();
-            const denoJson = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
-            let denoJsonObject: { compilerOptions: { types: string[] } };
-            if (Fs.existsSync(denoJson) && (await FsPromises.readFile(denoJson, { encoding: 'utf-8' })) !== '') {
-                denoJsonObject = await Jsonfile.readFile(denoJson);
-                denoJsonObject.compilerOptions = denoJsonObject.compilerOptions ?? {};
-                denoJsonObject.compilerOptions.types = denoJsonObject.compilerOptions.types ?? [];
-            } else {
-                denoJsonObject = { compilerOptions: { types: [] } };
-            }
-            denoJsonObject.compilerOptions.types = denoJsonObject.compilerOptions.types.filter(type => type.indexOf('denort_types') < 0);
+            const denoJsonPath = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
+            const denoJson = await this.workspace.getDenoJson();
             const latestUrl = await this.getLatestUrl();
-            if (!denoJsonObject.compilerOptions.types.includes(latestUrl)) {
-                denoJsonObject.compilerOptions.types.push(latestUrl);
+            if (!denoJson.compilerOptions) {
+                denoJson.compilerOptions = {};
             }
-            Jsonfile.writeFileSync(denoJson, denoJsonObject, { spaces: 4 });
+            if (!denoJson.compilerOptions.types) {
+                denoJson.compilerOptions.types = [];
+            }
+            if (!denoJson.compilerOptions.types.includes(latestUrl)) {
+                denoJson.compilerOptions.types.push(latestUrl);
+            }
+            Jsonfile.writeFileSync(denoJsonPath, denoJson, { spaces: 4 });
 
             const root = this.context.extensionPath;
             const mainTs = Path.join(workspaceFolder.uri.fsPath, 'main.ts');
@@ -140,10 +138,22 @@ export default class Initializer {
             denoJsonObject.compilerOptions.types.push(latestUrl);
             await Jsonfile.writeFile(denoJson, denoJsonObject, { spaces: 4 });
 
-            await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-            await Vscode.commands.executeCommand(DENO_CMD_CACHE);
-            await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-            await Vscode.commands.executeCommand(DENO_CMD_RESTART);
+            for (let i = 0; i < 5; i++) {
+                try {
+                    await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+                    await Vscode.commands.executeCommand(DENO_CMD_CACHE);
+                    await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+                    await Vscode.commands.executeCommand(DENO_CMD_RESTART);
+                    break;
+                } catch (e) {
+                    Output.printlnAndShow('更新类型定义文件失败:', e);
+                    if (i < 4) {
+                        Output.printlnAndShow('重试中...');
+                    } else {
+                        throw e;
+                    }
+                }
+            }
 
             Output.printlnAndShow('更新类型定义文件成功');
         } catch (err) {
