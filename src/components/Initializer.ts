@@ -62,15 +62,11 @@ export default class Initializer {
             const denoJsonPath = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
             const denoJson = await this.workspace.getDenoJson();
             const latestUrl = await this.getLatestUrl();
-            if (!denoJson.compilerOptions) {
-                denoJson.compilerOptions = {};
-            }
-            if (!denoJson.compilerOptions.types) {
-                denoJson.compilerOptions.types = [];
-            }
-            if (!denoJson.compilerOptions.types.includes(latestUrl)) {
-                denoJson.compilerOptions.types.push(latestUrl);
-            }
+            const types = denoJson?.compilerOptions?.types ?? [];
+            const filtedTypes = types.filter(it => !it.includes('denort_types'));
+            filtedTypes.push(latestUrl);
+            denoJson.compilerOptions = denoJson.compilerOptions ?? {};
+            denoJson.compilerOptions.types = filtedTypes;
             Jsonfile.writeFileSync(denoJsonPath, denoJson, { spaces: 4 });
 
             const root = this.context.extensionPath;
@@ -112,20 +108,12 @@ export default class Initializer {
                 return;
             }
 
-            const workspaceFolder = this.workspace.getWorkspaceFolder();
-            const denoJson = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
-            let denoJsonObject: { compilerOptions: { types: string[] } };
-            if (Fs.existsSync(denoJson) && (await FsPromises.readFile(denoJson, { encoding: 'utf-8' })) !== '') {
-                denoJsonObject = Jsonfile.readFileSync(denoJson);
-                denoJsonObject.compilerOptions = denoJsonObject.compilerOptions ?? {};
-                denoJsonObject.compilerOptions.types = denoJsonObject.compilerOptions.types ?? [];
-            } else {
-                denoJsonObject = { compilerOptions: { types: [] } };
-            }
+            const denoJson = await this.workspace.getDenoJson();
+            const types = denoJson?.compilerOptions?.types ?? [];
 
             const latestVersion = await this.getLatestVersion();
             const latestUrl = await this.getLatestUrl(latestVersion);
-            if (denoJsonObject.compilerOptions.types.includes(latestUrl)) {
+            if (types.includes(latestUrl)) {
                 return;
             }
 
@@ -134,9 +122,13 @@ export default class Initializer {
                 return;
             }
 
-            denoJsonObject.compilerOptions.types = denoJsonObject.compilerOptions.types.filter(type => type.indexOf('denort_types') < 0);
-            denoJsonObject.compilerOptions.types.push(latestUrl);
-            await Jsonfile.writeFile(denoJson, denoJsonObject, { spaces: 4 });
+            const filtedTypes = types.filter(it => !it.includes('denort_types'));
+            filtedTypes.push(latestUrl);
+            denoJson.compilerOptions = denoJson.compilerOptions ?? {};
+            denoJson.compilerOptions.types = filtedTypes;
+            const workspaceFolder = this.workspace.getWorkspaceFolder();
+            const denoJsonPath = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
+            await Jsonfile.writeFile(denoJsonPath, denoJson, { spaces: 4 });
 
             for (let i = 0; i < 5; i++) {
                 try {

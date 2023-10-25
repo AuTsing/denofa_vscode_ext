@@ -80,14 +80,25 @@ export default class Wsd {
     }
 
     private async removeProject(): Promise<void> {
+        const projectNames = [] as string[];
+
+        const denoJson = await this.workspace.getDenoJson();
+        const imports = Object.values(denoJson.imports ?? {});
+        const localImports = imports.filter(it => typeof it === 'string' && it.startsWith('.')) as string[];
+        const localImportNames = localImports.map(it => Path.basename(it));
+        projectNames.push(...localImportNames);
+
         const workspaceFolder = this.workspace.getWorkspaceFolder();
-        const name = workspaceFolder.name;
-        const cmd: RemoveCommand = {
-            cmd: Commands.Remove,
-            data: { name },
-        };
-        const message = this.commander.adaptCommand(cmd);
-        await this.send(message);
+        projectNames.push(workspaceFolder.name);
+
+        for (const name of projectNames) {
+            const cmd: RemoveCommand = {
+                cmd: Commands.Remove,
+                data: { name },
+            };
+            const message = this.commander.adaptCommand(cmd);
+            await this.send(message);
+        }
     }
 
     private async uploadProject(): Promise<void> {
