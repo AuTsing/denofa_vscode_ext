@@ -199,7 +199,7 @@ export default class Wsd {
             };
             const message = this.commander.adaptCommand(cmd);
             await this.send(message);
-            Output.eprintln('运行工程成功:', name);
+            Output.println('运行工程成功:', name);
         } catch (e) {
             Output.eprintln('运行工程失败:', e);
         }
