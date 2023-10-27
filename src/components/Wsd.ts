@@ -3,7 +3,7 @@ import * as FsPromises from 'fs/promises';
 import * as Path from 'path';
 import Output from './Output';
 import Asker from './Asker';
-import Commander, { Commands, RemoveCommand, RunCommand, SnapshotCommand, StopCommand, UploadCommand } from './Commander';
+import Commander, { Commands, ProjectState, RemoveCommand, RunCommand, SnapshotCommand, StatusCommand, StopCommand, UploadCommand } from './Commander';
 import Workspace from './Workspace';
 import StatusBar from './StatusBar';
 import Storage from './Storage';
@@ -117,6 +117,23 @@ export default class Wsd {
         }
     }
 
+    private async getProjectStatus(): Promise<ProjectState> {
+        const workspaceFolder = this.workspace.getWorkspaceFolder();
+        const name = workspaceFolder.name;
+
+        const cmd: StatusCommand = {
+            cmd: Commands.Status,
+            data: {
+                name,
+                state: ProjectState.Free,
+            },
+        };
+        const message = this.commander.adaptCommand(cmd);
+        await this.send(message);
+        const statusData = await this.commander.waitForStatusData();
+        return statusData.state;
+    }
+
     private async connectAutomatically(): Promise<void> {
         if (this.wsc) {
             return;
@@ -189,6 +206,10 @@ export default class Wsd {
     async handleRun() {
         try {
             await this.connectAutomatically();
+            const state = await this.getProjectStatus();
+            if (state !== ProjectState.Free) {
+                throw new Error('工程正在运行中');
+            }
             await this.removeProject();
             await this.uploadProject();
             const workspaceFolder = this.workspace.getWorkspaceFolder();

@@ -9,6 +9,7 @@ export enum Commands {
     Log = 'log',
     StatusBar = 'statusBar',
     Snapshot = 'snapshot',
+    Status = 'status',
 }
 
 export enum LogLevel {
@@ -17,12 +18,17 @@ export enum LogLevel {
     Error = 'Error',
 }
 
+export enum ProjectState {
+    Running = 'Running',
+    Free = 'Free',
+}
+
 interface BaseCommand {
     cmd: Command['cmd'];
     data: Command['data'];
 }
 
-export type Command = RunCommand | StopCommand | RemoveCommand | UploadCommand | LogCommand | StatusBarCommand | SnapshotCommand;
+export type Command = RunCommand | StopCommand | RemoveCommand | UploadCommand | LogCommand | StatusBarCommand | SnapshotCommand | StatusCommand;
 
 export interface RunCommand extends BaseCommand {
     cmd: Commands.Run;
@@ -59,16 +65,29 @@ export interface SnapshotCommand extends BaseCommand {
     data: { success: boolean; message: string; file: number[] };
 }
 
+export interface StatusCommand extends BaseCommand {
+    cmd: Commands.Status;
+    data: { name: string; state: ProjectState };
+}
+
 export default class Commander {
     private readonly snapshotConsumers: ((data: SnapshotCommand['data']) => void)[];
+    private readonly statusConsumers: ((data: StatusCommand['data']) => void)[];
 
     constructor() {
         this.snapshotConsumers = [];
+        this.statusConsumers = [];
     }
 
     async waitForSnapshotData(): Promise<SnapshotCommand['data']> {
         return new Promise((resolve, reject) => {
             this.snapshotConsumers.push(resolve);
+        });
+    }
+
+    async waitForStatusData(): Promise<StatusCommand['data']> {
+        return new Promise((resolve, _) => {
+            this.statusConsumers.push(resolve);
         });
     }
 
@@ -106,10 +125,10 @@ export default class Commander {
                     StatusBar.running(cmd.data.runningProjects);
                     break;
                 case Commands.Snapshot:
-                    const consumer = this.snapshotConsumers.shift();
-                    if (consumer) {
-                        consumer(cmd.data);
-                    }
+                    this.snapshotConsumers.shift()?.(cmd.data);
+                    break;
+                case Commands.Status:
+                    this.statusConsumers.shift()?.(cmd.data);
                     break;
                 default:
                     throw new Error(`不支持的命令: ${cmd.cmd}`);
