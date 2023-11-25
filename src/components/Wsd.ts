@@ -80,6 +80,8 @@ export default class Wsd {
     }
 
     private async removeProject(): Promise<void> {
+        const doingRemove = StatusBar.doing('清理工程中');
+
         const projectNames = [] as string[];
 
         const denoJson = await this.workspace.getDenoJson();
@@ -99,9 +101,13 @@ export default class Wsd {
             const message = this.commander.adaptCommand(cmd);
             await this.send(message);
         }
+
+        doingRemove?.dispose();
     }
 
     private async uploadProject(): Promise<void> {
+        const doingUpload = StatusBar.doing('上传工程中');
+
         const files = await this.workspace.getWrokspaceFiles();
         for (const file of files) {
             const buffer = await FsPromises.readFile(file.absolutePath);
@@ -115,6 +121,8 @@ export default class Wsd {
             const message = this.commander.adaptCommand(cmd);
             await this.send(message);
         }
+
+        doingUpload?.dispose();
     }
 
     private async getProjectStatus(): Promise<ProjectState> {
