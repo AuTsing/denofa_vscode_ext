@@ -1,10 +1,10 @@
 {
-    "name": "vscode-denort",
+    "name": "denort_vsocde_ext",
     "displayName": "Denort",
-    "description": "VSCode extension for Denort.",
+    "description": "Denort extension for VSCode",
     "version": "0.1.12",
     "publisher": "autsing",
-    "repository": "https://github.com/AuTsing/vscode-denort",
+    "repository": "https://github.com/AuTsing/denort_vscode_ext",
     "icon": "./assets/images/denort_128_128.png",
     "keywords": [
         "denort",
