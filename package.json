@@ -1,5 +1,5 @@
 {
-    "name": "denort-vsocde-ext",
+    "name": "denort-vscode-ext",
     "displayName": "Denort",
     "description": "Denort extension for VSCode",
     "version": "0.1.13",
