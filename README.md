@@ -1,6 +1,6 @@
-# VSCode Denort README
+# Denort VSCode Ext README
 
-VSCode extension for Denort.
+This is an extension for Denort.
 
 ## Features
 

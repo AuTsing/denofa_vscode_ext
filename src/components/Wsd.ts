@@ -79,6 +79,28 @@ export default class Wsd {
         });
     }
 
+    private async runProject(): Promise<void> {
+        const workspaceFolder = this.workspace.getWorkspaceFolder();
+        const name = workspaceFolder.name;
+        const cmd: RunCommand = {
+            cmd: Commands.Run,
+            data: { name },
+        };
+        const message = this.commander.adaptCommand(cmd);
+        await this.send(message);
+    }
+
+    private async stopProject(): Promise<void> {
+        const workspaceFolder = this.workspace.getWorkspaceFolder();
+        const name = workspaceFolder.name;
+        const cmd: StopCommand = {
+            cmd: Commands.Stop,
+            data: { name },
+        };
+        const message = this.commander.adaptCommand(cmd);
+        await this.send(message);
+    }
+
     private async removeProject(): Promise<void> {
         const doingRemove = StatusBar.doing('清理工程中');
 
@@ -215,20 +237,13 @@ export default class Wsd {
         try {
             await this.connectAutomatically();
             const state = await this.getProjectStatus();
-            if (state !== ProjectState.Free) {
-                throw new Error('工程正在运行中');
+            if (state === ProjectState.Running) {
+                await this.stopProject();
             }
             await this.removeProject();
             await this.uploadProject();
-            const workspaceFolder = this.workspace.getWorkspaceFolder();
-            const name = workspaceFolder.name;
-            const cmd: RunCommand = {
-                cmd: Commands.Run,
-                data: { name },
-            };
-            const message = this.commander.adaptCommand(cmd);
-            await this.send(message);
-            Output.println('运行工程成功:', name);
+            await this.runProject();
+            Output.println('运行工程成功');
         } catch (e) {
             Output.eprintln('运行工程失败:', e);
         }
@@ -237,14 +252,7 @@ export default class Wsd {
     async handleStop() {
         try {
             await this.connectAutomatically();
-            const workspaceFolder = this.workspace.getWorkspaceFolder();
-            const name = workspaceFolder.name;
-            const cmd: StopCommand = {
-                cmd: Commands.Stop,
-                data: { name },
-            };
-            const message = this.commander.adaptCommand(cmd);
-            await this.send(message);
+            await this.stopProject();
         } catch (e) {
             Output.eprintln('停止工程失败:', e);
         }
