@@ -3,7 +3,7 @@ import * as FsPromises from 'fs/promises';
 import * as Path from 'path';
 import Output from './Output';
 import Asker from './Asker';
-import Commander, { Commands, ProjectState, RemoveCommand, RunCommand, SnapshotCommand, StatusCommand, StopCommand, UploadCommand } from './Commander';
+import Commander, { Command, Commands, ProjectState, RemoveCommand, RunCommand, SnapshotCommand, StatusCommand, StopCommand, UploadCommand } from './Commander';
 import Workspace from './Workspace';
 import StatusBar from './StatusBar';
 import Storage from './Storage';
@@ -79,6 +79,11 @@ export default class Wsd {
         });
     }
 
+    private async sendCommand(cmd: Command) {
+        const message = this.commander.adaptCommand(cmd);
+        await this.send(message);
+    }
+
     private async runProject(): Promise<void> {
         const workspaceFolder = this.workspace.getWorkspaceFolder();
         const name = workspaceFolder.name;
@@ -86,8 +91,12 @@ export default class Wsd {
             cmd: Commands.Run,
             data: { name },
         };
-        const message = this.commander.adaptCommand(cmd);
-        await this.send(message);
+        const resultPromise = this.commander.waitForResultData();
+        await this.sendCommand(cmd);
+        const result = await resultPromise;
+        if (!result.success) {
+            throw Error(result.message);
+        }
     }
 
     private async stopProject(): Promise<void> {
@@ -97,8 +106,12 @@ export default class Wsd {
             cmd: Commands.Stop,
             data: { name },
         };
-        const message = this.commander.adaptCommand(cmd);
-        await this.send(message);
+        const resultPromise = this.commander.waitForResultData();
+        await this.sendCommand(cmd);
+        const result = await resultPromise;
+        if (!result.success) {
+            throw Error(result.message);
+        }
     }
 
     private async removeProject(): Promise<void> {
@@ -120,8 +133,12 @@ export default class Wsd {
                 cmd: Commands.Remove,
                 data: { name },
             };
-            const message = this.commander.adaptCommand(cmd);
-            await this.send(message);
+            const resultPromise = this.commander.waitForResultData();
+            await this.sendCommand(cmd);
+            const result = await resultPromise;
+            if (!result.success) {
+                throw Error(result.message);
+            }
         }
 
         doingRemove?.dispose();
@@ -140,8 +157,12 @@ export default class Wsd {
                     file: Array.from(new Uint8Array(buffer)),
                 },
             };
-            const message = this.commander.adaptCommand(cmd);
-            await this.send(message);
+            const resultPromise = this.commander.waitForResultData();
+            await this.sendCommand(cmd);
+            const result = await resultPromise;
+            if (!result.success) {
+                throw Error(result.message);
+            }
         }
 
         doingUpload?.dispose();
@@ -158,9 +179,15 @@ export default class Wsd {
                 state: ProjectState.Free,
             },
         };
-        const message = this.commander.adaptCommand(cmd);
-        await this.send(message);
-        const statusData = await this.commander.waitForStatusData();
+        const resultPromise = this.commander.waitForResultData();
+        const statusDataPromise = this.commander.waitForStatusData();
+        await this.sendCommand(cmd);
+        const result = await resultPromise;
+        if (!result.success) {
+            this.commander.resetStatusConsumers();
+            throw Error(result.message);
+        }
+        const statusData = await statusDataPromise;
         return statusData.state;
     }
 
@@ -192,18 +219,17 @@ export default class Wsd {
     private async snapshot(): Promise<Uint8Array> {
         const cmd: SnapshotCommand = {
             cmd: Commands.Snapshot,
-            data: {
-                success: true,
-                message: '',
-                file: [],
-            },
+            data: { file: [] },
         };
-        const message = this.commander.adaptCommand(cmd);
-        await this.send(message);
-        const snapshotData = await this.commander.waitForSnapshotData();
-        if (!snapshotData.success) {
-            throw new Error(snapshotData.message);
+        const resultPromise = this.commander.waitForResultData();
+        const snapshotDataPromise = this.commander.waitForSnapshotData();
+        await this.sendCommand(cmd);
+        const result = await resultPromise;
+        if (!result.success) {
+            this.commander.resetSnapshotConsumers();
+            throw Error(result.message);
         }
+        const snapshotData = await snapshotDataPromise;
         return Uint8Array.from(snapshotData.file);
     }
 

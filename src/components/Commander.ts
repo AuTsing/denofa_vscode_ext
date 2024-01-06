@@ -10,6 +10,7 @@ export enum Commands {
     StatusBar = 'statusBar',
     Snapshot = 'snapshot',
     Status = 'status',
+    Result = 'result',
 }
 
 export enum LogLevel {
@@ -28,7 +29,16 @@ interface BaseCommand {
     data: Command['data'];
 }
 
-export type Command = RunCommand | StopCommand | RemoveCommand | UploadCommand | LogCommand | StatusBarCommand | SnapshotCommand | StatusCommand;
+export type Command =
+    | RunCommand
+    | StopCommand
+    | RemoveCommand
+    | UploadCommand
+    | LogCommand
+    | StatusBarCommand
+    | SnapshotCommand
+    | StatusCommand
+    | ResultCommand;
 
 export interface RunCommand extends BaseCommand {
     cmd: Commands.Run;
@@ -62,7 +72,7 @@ export interface StatusBarCommand extends BaseCommand {
 
 export interface SnapshotCommand extends BaseCommand {
     cmd: Commands.Snapshot;
-    data: { success: boolean; message: string; file: number[] };
+    data: { file: number[] };
 }
 
 export interface StatusCommand extends BaseCommand {
@@ -70,17 +80,24 @@ export interface StatusCommand extends BaseCommand {
     data: { name: string; state: ProjectState };
 }
 
+export interface ResultCommand extends BaseCommand {
+    cmd: Commands.Result;
+    data: { success: boolean; message: string };
+}
+
 export default class Commander {
-    private readonly snapshotConsumers: ((data: SnapshotCommand['data']) => void)[];
-    private readonly statusConsumers: ((data: StatusCommand['data']) => void)[];
+    private snapshotConsumers: ((data: SnapshotCommand['data']) => void)[];
+    private statusConsumers: ((data: StatusCommand['data']) => void)[];
+    private resultConsumers: ((data: ResultCommand['data']) => void)[];
 
     constructor() {
         this.snapshotConsumers = [];
         this.statusConsumers = [];
+        this.resultConsumers = [];
     }
 
     async waitForSnapshotData(): Promise<SnapshotCommand['data']> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, _) => {
             this.snapshotConsumers.push(resolve);
         });
     }
@@ -89,6 +106,24 @@ export default class Commander {
         return new Promise((resolve, _) => {
             this.statusConsumers.push(resolve);
         });
+    }
+
+    async waitForResultData(): Promise<ResultCommand['data']> {
+        return new Promise((resolve, _) => {
+            this.resultConsumers.push(resolve);
+        });
+    }
+
+    resetSnapshotConsumers() {
+        this.snapshotConsumers = [];
+    }
+
+    resetStatusConsumers() {
+        this.statusConsumers = [];
+    }
+
+    resetResultConsumers() {
+        this.resultConsumers = [];
     }
 
     adaptCommand(cmd: string): Command;
@@ -104,6 +139,8 @@ export default class Commander {
     }
 
     handleMessage(message: string) {
+        console.log(message, this.resultConsumers);
+
         try {
             const cmd = this.adaptCommand(message);
             switch (cmd.cmd) {
@@ -129,6 +166,9 @@ export default class Commander {
                     break;
                 case Commands.Status:
                     this.statusConsumers.shift()?.(cmd.data);
+                    break;
+                case Commands.Result:
+                    this.resultConsumers.shift()?.(cmd.data);
                     break;
                 default:
                     throw new Error(`不支持的命令: ${cmd.cmd}`);
