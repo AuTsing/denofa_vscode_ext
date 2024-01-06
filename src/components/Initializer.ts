@@ -16,16 +16,18 @@ export default class Initializer {
     private readonly workspace: Workspace;
     private readonly asker: Asker;
     private readonly storage: Storage;
+    private triedUpdateDenortDtsTimes: number;
 
     constructor(context: Vscode.ExtensionContext, workspace: Workspace, asker: Asker, storage: Storage) {
         this.context = context;
         this.workspace = workspace;
         this.asker = asker;
         this.storage = storage;
+        this.triedUpdateDenortDtsTimes = 0;
     }
 
     private async getLatestVersion(): Promise<string> {
-        const axios = Axios.create({ maxRedirects: 0 });
+        const axios = Axios.create({ maxRedirects: 0, timeout: 3000 });
         axios.interceptors.response.use(
             resp => resp,
             err => {
@@ -98,6 +100,8 @@ export default class Initializer {
 
     async updateDenortDts() {
         try {
+            this.triedUpdateDenortDtsTimes++;
+
             const denortConfig = this.workspace.getDenortConfiguration();
             if (denortConfig.get('enable') !== true) {
                 return;
@@ -130,26 +134,19 @@ export default class Initializer {
             const denoJsonPath = Path.join(workspaceFolder.uri.fsPath, 'deno.json');
             await Jsonfile.writeFile(denoJsonPath, denoJson, { spaces: 4 });
 
-            for (let i = 0; i < 5; i++) {
-                try {
-                    await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-                    await Vscode.commands.executeCommand(DENO_CMD_CACHE);
-                    await new Promise(resolve => setTimeout(() => resolve(null), 1000));
-                    await Vscode.commands.executeCommand(DENO_CMD_RESTART);
-                    break;
-                } catch (e) {
-                    Output.printlnAndShow('更新类型定义文件失败:', e);
-                    if (i < 4) {
-                        Output.printlnAndShow('重试中...');
-                    } else {
-                        throw e;
-                    }
-                }
-            }
+            await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+            await Vscode.commands.executeCommand(DENO_CMD_CACHE);
+            await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+            await Vscode.commands.executeCommand(DENO_CMD_RESTART);
 
             Output.printlnAndShow('更新类型定义文件成功');
         } catch (err) {
             Output.eprintln('更新类型定义文件失败:', err);
+
+            if (this.triedUpdateDenortDtsTimes < 5) {
+                Output.eprintln('尝试重新执行更新类型定义文件');
+                this.updateDenortDts();
+            }
         }
     }
 }
