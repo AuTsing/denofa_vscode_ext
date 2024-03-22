@@ -1,14 +1,14 @@
 {
-    "name": "denort-vscode-ext",
-    "displayName": "Denort",
-    "description": "Denort extension for VSCode",
+    "name": "denofa-vscode-ext",
+    "displayName": "Denofa",
+    "description": "Denofa extension for VSCode",
     "version": "0.1.17",
     "publisher": "autsing",
-    "repository": "https://github.com/AuTsing/denort_vscode_ext",
-    "icon": "./assets/images/denort_128_128.png",
+    "repository": "https://github.com/AuTsing/denofa_vscode_ext",
+    "icon": "./assets/images/logo_128_128.png",
     "keywords": [
-        "denort",
-        "Denort"
+        "denofa",
+        "Denofa"
     ],
     "engines": {
         "vscode": "^1.76.0"
@@ -24,47 +24,47 @@
     "contributes": {
         "commands": [
             {
-                "command": "denort.initializeWorkspace",
-                "title": "Denort: 初始化工作区"
+                "command": "denofa.initializeWorkspace",
+                "title": "Denofa: 初始化工作区"
             },
             {
-                "command": "denort.updateDenortDts",
-                "title": "Denort: 检查更新类型定义文件"
+                "command": "denofa.updateDts",
+                "title": "Denofa: 检查更新类型定义文件"
             },
             {
-                "command": "denort.connect",
-                "title": "Denort: 连接设备"
+                "command": "denofa.connect",
+                "title": "Denofa: 连接设备"
             },
             {
-                "command": "denort.disconnect",
-                "title": "Denort: 断开设备"
+                "command": "denofa.disconnect",
+                "title": "Denofa: 断开设备"
             },
             {
-                "command": "denort.run",
-                "title": "Denort: 运行工程"
+                "command": "denofa.run",
+                "title": "Denofa: 运行工程"
             },
             {
-                "command": "denort.stop",
-                "title": "Denort: 停止工程"
+                "command": "denofa.stop",
+                "title": "Denofa: 停止工程"
             },
             {
-                "command": "denort.upload",
-                "title": "Denort: 上传工程"
+                "command": "denofa.upload",
+                "title": "Denofa: 上传工程"
             },
             {
-                "command": "denort.snapshot",
-                "title": "Denort: 屏幕截图"
+                "command": "denofa.snapshot",
+                "title": "Denofa: 屏幕截图"
             }
         ],
         "configuration": {
-            "title": "Denort",
+            "title": "Denofa",
             "properties": {
-                "denort.enable": {
+                "denofa.enable": {
                     "description": "启用插件",
                     "type": "boolean",
                     "default": false
                 },
-                "denort.updateDts": {
+                "denofa.updateDts": {
                     "description": "检查更新类型定义文件",
                     "type": "boolean",
                     "default": true
@@ -87,7 +87,7 @@
         "@types/glob": "^8.1.0",
         "@types/jsonfile": "^6.1.1",
         "@types/mocha": "^10.0.1",
-        "@types/node": "16.x",
+        "@types/node": "18.x",
         "@types/vscode": "^1.76.0",
         "@types/ws": "^8.5.4",
         "@typescript-eslint/eslint-plugin": "^5.53.0",

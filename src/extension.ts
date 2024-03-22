@@ -22,7 +22,7 @@ export function activate(context: Vscode.ExtensionContext) {
     StatusBar.instance = new StatusBar(workspace);
 
     registry.register('initializeWorkspace', () => initializer.initializeWorkspace());
-    registry.register('updateDenortDts', () => initializer.updateDenortDts());
+    registry.register('updateDts', () => initializer.updateDts());
     registry.register('connect', () => wsd.handleConnect());
     registry.register('disconnect', () => wsd.handleDisconnect());
     registry.register('run', () => wsd.handleRun());
@@ -30,9 +30,9 @@ export function activate(context: Vscode.ExtensionContext) {
     registry.register('upload', () => wsd.handleUpload());
     registry.register('snapshot', () => wsd.handleSnapshot());
     registry.register('clickStatusBarItem', () => StatusBar.instance?.handleClickStatusBarItem());
-    registry.listenOnDidChangeConfiguration(() => initializer.initializeDenort());
+    registry.listenOnDidChangeConfiguration(() => initializer.initializeExtension());
 
-    initializer.initializeDenort();
+    initializer.initializeExtension();
 }
 
 export function deactivate() {}

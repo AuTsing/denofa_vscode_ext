@@ -1,5 +1,5 @@
 import * as Vscode from 'vscode';
-import { DENORT_NS } from '../values/Constants';
+import { DENOFA_NS } from '../values/Constants';
 
 export enum Configurations {
     UpdateDts = 'updateDts',
@@ -11,7 +11,7 @@ export default class Storage {
 
     constructor(context: Vscode.ExtensionContext) {
         this.state = context.globalState;
-        this.configuration = Vscode.workspace.getConfiguration(DENORT_NS);
+        this.configuration = Vscode.workspace.getConfiguration(DENOFA_NS);
     }
 
     getWsUrls(): string[] {

@@ -114,11 +114,11 @@ export default class StatusBar {
         this.statusItems = [];
         this.refresher = null;
         this.runningStatusItem = new StatusItem('', this.statusItems, '$(loading~spin)', '运行中');
-        const defaultStatusItem = new StatusItem('Denort', this.statusItems, '🦕');
+        const defaultStatusItem = new StatusItem('Denofa', this.statusItems, '🦕');
         this.statusItems.push(defaultStatusItem);
         this.statusBarItem.text = defaultStatusItem.display();
-        this.statusBarItem.tooltip = 'Denort';
-        this.statusBarItem.command = 'denort.clickStatusBarItem';
+        this.statusBarItem.tooltip = 'Denofa';
+        this.statusBarItem.command = 'denofa.clickStatusBarItem';
     }
 
     private refresh() {
@@ -135,13 +135,13 @@ export default class StatusBar {
 
     toggleStatusBar() {
         try {
-            const denortConfig = this.workspace.getDenortConfiguration();
-            if (denortConfig.get('enable') === true && this.refresher === null) {
+            const denofaConfig = this.workspace.getDenofaConfiguration();
+            if (denofaConfig.get('enable') === true && this.refresher === null) {
                 this.statusBarItem.show();
                 this.refresher = setInterval(() => this.refresh(), 1000);
-            } else if (denortConfig.get('enable') !== true && this.refresher !== null) {
+            } else if (denofaConfig.get('enable') !== true && this.refresher !== null) {
                 this.statusBarItem.hide();
-                clearInterval(this.refresher);
+                clearInterval(Number(this.refresher));
                 this.refresher = null;
             }
         } catch (e) {
@@ -151,13 +151,13 @@ export default class StatusBar {
 
     handleClickStatusBarItem() {
         if (this.runningStatusItem && this.statusItems.includes(this.runningStatusItem)) {
-            Vscode.commands.executeCommand('denort.stop');
+            Vscode.commands.executeCommand('denofa.stop');
             return;
         }
         if (this.statusItems.length > 1) {
-            Vscode.commands.executeCommand('denort.disconnect');
+            Vscode.commands.executeCommand('denofa.disconnect');
             return;
         }
-        Vscode.commands.executeCommand('denort.connect');
+        Vscode.commands.executeCommand('denofa.connect');
     }
 }

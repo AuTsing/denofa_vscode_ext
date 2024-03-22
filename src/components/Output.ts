@@ -1,6 +1,6 @@
 import * as Vscode from 'vscode';
 import * as Util from 'util';
-import { DENORT_CLIENT_NAME } from '../values/Constants';
+import { DENOFA_CLIENT_NAME } from '../values/Constants';
 
 export default class Output {
     static instance?: Output;
@@ -25,7 +25,7 @@ export default class Output {
     private readonly channel: Vscode.LogOutputChannel;
 
     constructor() {
-        this.channel = Vscode.window.createOutputChannel(DENORT_CLIENT_NAME, { log: true });
+        this.channel = Vscode.window.createOutputChannel(DENOFA_CLIENT_NAME, { log: true });
     }
 
     println(...args: any[]) {

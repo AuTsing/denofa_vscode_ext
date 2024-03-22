@@ -2,7 +2,7 @@ import * as Vscode from 'vscode';
 import * as FsPromises from 'fs/promises';
 import * as Fs from 'fs';
 import * as Path from 'path';
-import { DENORT_EXTENSION_ID, DENORT_NS, DENO_EXTENSION_ID, DENO_NS } from '../values/Constants';
+import { DENOFA_EXTENSION_ID, DENOFA_NS, DENO_EXTENSION_ID, DENO_NS } from '../values/Constants';
 
 export interface WorkspaceFile {
     name: string;
@@ -80,12 +80,12 @@ export default class Workspace {
         return Vscode.workspace.getConfiguration(DENO_NS);
     }
 
-    getDenortConfiguration(): Vscode.WorkspaceConfiguration {
-        const denortExtension = Vscode.extensions.getExtension(DENORT_EXTENSION_ID);
-        if (!denortExtension) {
-            throw new Error('未检测到 `Denort` 插件，请先安装插件后再进行操作');
+    getDenofaConfiguration(): Vscode.WorkspaceConfiguration {
+        const denofaExtension = Vscode.extensions.getExtension(DENOFA_EXTENSION_ID);
+        if (!denofaExtension) {
+            throw new Error('未检测到 `Denofa` 插件，请先安装插件后再进行操作');
         }
-        return Vscode.workspace.getConfiguration(DENORT_NS);
+        return Vscode.workspace.getConfiguration(DENOFA_NS);
     }
 
     async getDenoJson(): Promise<DenoJson> {
