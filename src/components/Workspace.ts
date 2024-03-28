@@ -29,7 +29,11 @@ export default class Workspace {
         return workspaceFolders[0];
     }
 
-    private async readdirRecursively(absolutePath: string, relativePath: string = '', files: WorkspaceFile[] = []): Promise<WorkspaceFile[]> {
+    private async readdirRecursively(
+        absolutePath: string,
+        relativePath: string = '',
+        files: WorkspaceFile[] = [],
+    ): Promise<WorkspaceFile[]> {
         const dirents = await FsPromises.readdir(absolutePath, { withFileTypes: true });
         for (const dirent of dirents) {
             if (dirent.name.startsWith('.')) {
@@ -45,7 +49,11 @@ export default class Workspace {
                 continue;
             }
             if (dirent.isDirectory()) {
-                await this.readdirRecursively(Path.join(absolutePath, dirent.name), Path.join(relativePath, dirent.name), files);
+                await this.readdirRecursively(
+                    Path.join(absolutePath, dirent.name),
+                    Path.join(relativePath, dirent.name),
+                    files,
+                );
                 continue;
             }
         }
@@ -58,15 +66,22 @@ export default class Workspace {
 
         const denoJson = await this.getDenoJson();
         const imports = Object.values(denoJson.imports ?? {});
-        const localImports = imports.filter(it => typeof it === 'string' && it.startsWith('.')) as string[];
-        const localImportsAbsolutePaths = localImports.map(it => Path.resolve(workspaceFolder.uri.fsPath, it));
+        const localImports = imports.filter(
+            it => typeof it === 'string' && it.startsWith('.'),
+        ) as string[];
+        const localImportsAbsolutePaths = localImports.map(it =>
+            Path.resolve(workspaceFolder.uri.fsPath, it),
+        );
         for (const path of localImportsAbsolutePaths) {
             const name = Path.basename(path);
             const files = await this.readdirRecursively(path, 'Projects/' + name);
             workspaceFiles.push(...files);
         }
 
-        const files = await this.readdirRecursively(workspaceFolder.uri.fsPath, 'Projects/' + workspaceFolder.name);
+        const files = await this.readdirRecursively(
+            workspaceFolder.uri.fsPath,
+            'Projects/' + workspaceFolder.name,
+        );
         workspaceFiles.push(...files);
 
         return workspaceFiles;
@@ -75,7 +90,7 @@ export default class Workspace {
     getDenoConfiguration(): Vscode.WorkspaceConfiguration {
         const denoExtension = Vscode.extensions.getExtension(DENO_EXTENSION_ID);
         if (!denoExtension) {
-            throw new Error('未检测到 `Deno` 官方插件，请先安装插件后再进行操作');
+            throw new Error('未检测到 Deno 官方插件，请先安装插件后再进行操作');
         }
         return Vscode.workspace.getConfiguration(DENO_NS);
     }
@@ -83,7 +98,7 @@ export default class Workspace {
     getDenofaConfiguration(): Vscode.WorkspaceConfiguration {
         const denofaExtension = Vscode.extensions.getExtension(DENOFA_EXTENSION_ID);
         if (!denofaExtension) {
-            throw new Error('未检测到 `Denofa` 插件，请先安装插件后再进行操作');
+            throw new Error('未检测到 Denofa 插件，请先安装插件后再进行操作');
         }
         return Vscode.workspace.getConfiguration(DENOFA_NS);
     }

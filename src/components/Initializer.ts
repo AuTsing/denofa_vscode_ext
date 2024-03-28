@@ -18,7 +18,12 @@ export default class Initializer {
     private readonly storage: Storage;
     private triedUpdateDtsTimes: number;
 
-    constructor(context: Vscode.ExtensionContext, workspace: Workspace, asker: Asker, storage: Storage) {
+    constructor(
+        context: Vscode.ExtensionContext,
+        workspace: Workspace,
+        asker: Asker,
+        storage: Storage,
+    ) {
         this.context = context;
         this.workspace = workspace;
         this.asker = asker;
@@ -36,7 +41,7 @@ export default class Initializer {
                 } else {
                     return Promise.reject(err);
                 }
-            }
+            },
         );
         const resp = await axios.get(DTS_URL);
         const location = resp.headers.location as string;
@@ -78,14 +83,24 @@ export default class Initializer {
                 const mainTsTemplate = Path.join(root, 'assets', 'templates', 'main.ts');
                 const mainTsContent = await FsPromises.readFile(mainTsTemplate);
                 await FsPromises.writeFile(mainTs, mainTsContent);
+            } else {
+                Output.println('main.ts/main.js 已存在，跳过创建');
             }
 
-            const denoConfig = this.workspace.getDenoConfiguration();
-            await denoConfig.update('enable', true);
-            await denoConfig.update('lint', true);
-            await denoConfig.update('unstable', true);
             const denofaConfig = this.workspace.getDenofaConfiguration();
-            await denofaConfig.update('enable', true);
+            if (denofaConfig.get('enable') !== true) {
+                await denofaConfig.update('enable', true);
+                await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+            } else {
+                Output.println('Denofa 插件已开启，跳过开启');
+            }
+            const denoConfig = this.workspace.getDenoConfiguration();
+            if (denoConfig.get('enable') !== true) {
+                await denoConfig.update('enable', true);
+                await new Promise(resolve => setTimeout(() => resolve(null), 1000));
+            } else {
+                Output.println('Deno 插件已开启，跳过开启');
+            }
 
             Output.printlnAndShow('Denofa 工作区初始化成功');
         } catch (err) {
@@ -95,7 +110,7 @@ export default class Initializer {
 
     async initializeExtension() {
         StatusBar.instance?.toggleStatusBar();
-        this.updateDts();
+        await this.updateDts();
     }
 
     async updateDts() {
@@ -139,6 +154,7 @@ export default class Initializer {
             await new Promise(resolve => setTimeout(() => resolve(null), 1000));
             await Vscode.commands.executeCommand(DENO_CMD_RESTART);
 
+            this.triedUpdateDtsTimes = 0;
             Output.printlnAndShow('更新类型定义文件成功');
         } catch (err) {
             Output.eprintln('更新类型定义文件失败:', err);
