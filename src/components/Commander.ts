@@ -139,8 +139,6 @@ export default class Commander {
     }
 
     handleMessage(message: string) {
-        console.log(message, this.resultConsumers);
-
         try {
             const cmd = this.adaptCommand(message);
             switch (cmd.cmd) {
