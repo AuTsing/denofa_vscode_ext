@@ -2,7 +2,7 @@
     "name": "denofa-vscode-ext",
     "displayName": "Denofa",
     "description": "Denofa extension for VSCode",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "publisher": "autsing",
     "repository": "https://github.com/AuTsing/denofa_vscode_ext",
     "icon": "./assets/images/logo_128_128.png",
